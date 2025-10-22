@@ -43,17 +43,25 @@ const Hero = () => {
   return (
     <section className="hero" aria-labelledby="hero-featured">
       <div className="hero__content">
-        <div className="hero__image" role="presentation">
-          Imagen
+        <div className="hero__media" aria-label="Video destacado">
+          <div className="hero__video">
+            <iframe
+              src="https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1"
+              title="Video destacado"
+              frameBorder="0"
+              allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            ></iframe>
+          </div>
         </div>
         <div className="hero__text">
-          <h2 id="hero-featured">Título noticia destacada</h2>
-          <p>Resumen de la noticia en dos líneas para contextualizar el contenido principal de la jornada.</p>
+          <h2 id="hero-featured">MARKA E: Plataforma digital del sur de Chile</h2>
+          <p>Conoce el proyecto informativo de Agencia MARKA PM que reúne noticias, entrevistas y análisis del ecosistema empresarial sureño, con foco en innovación, sostenibilidad y desarrollo regional.</p>
           <hr />
-          <ul aria-hidden="true">
-            <li></li>
-            <li></li>
-            <li></li>
+          <ul className="hero__highlights">
+            <li><span>•</span> Empresas sureñas lanzan agenda 2025 para digitalizar procesos productivos.</li>
+            <li><span>•</span> Pymes turísticas de La Araucanía apuestan por experiencias sostenibles con apoyo de MARKA E.</li>
+            <li><span>•</span> Foro empresarial en Puerto Montt reúne líderes para debatir innovación y capital humano.</li>
           </ul>
         </div>
       </div>
