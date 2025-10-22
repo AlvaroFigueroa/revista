@@ -39,6 +39,112 @@ const Header = () => {
   );
 };
 
+const Hero = () => {
+  return (
+    <section className="hero" aria-labelledby="hero-featured">
+      <div className="hero__content">
+        <div className="hero__image" role="presentation">
+          Imagen
+        </div>
+        <div className="hero__text">
+          <h2 id="hero-featured">Título noticia destacada</h2>
+          <p>Resumen de la noticia en dos líneas para contextualizar el contenido principal de la jornada.</p>
+          <hr />
+          <ul aria-hidden="true">
+            <li></li>
+            <li></li>
+            <li></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const RecentVideos = () => {
+  const videos = [
+    { id: 1, label: 'Miniatura', date: '15 oct 2025' },
+    { id: 2, label: 'Miniatura', date: '12 oct 2025' },
+    { id: 3, label: 'Miniatura', date: '08 oct 2025' },
+  ];
+
+  return (
+    <section className="videos" aria-labelledby="recent-videos">
+      <div className="videos__header">
+        <h2 id="recent-videos">Videos recientes</h2>
+      </div>
+      <div className="videos__grid">
+        {videos.map((video) => (
+          <article key={video.id} className="video-card">
+            <div className="video-card__thumbnail">{video.label}</div>
+            <div className="video-card__meta">{video.date}</div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const WrittenHighlights = () => {
+  const articles = [
+    {
+      id: 1,
+      title: 'Título de la noticia',
+      excerpt: 'Extracto de la noticia',
+    },
+    {
+      id: 2,
+      title: 'Título de la noticia',
+      excerpt: 'Extracto de la noticia',
+    },
+  ];
+
+  return (
+    <section className="written" aria-labelledby="written-highlights">
+      <div className="written__header">
+        <h2 id="written-highlights">Noticias escritas destacadas</h2>
+      </div>
+      <div className="written__grid">
+        {articles.map((article) => (
+          <article key={article.id} className="written-card">
+            <div className="written-card__image">Imagen</div>
+            <div className="written-card__content">
+              <h3>{article.title}</h3>
+              <p>{article.excerpt}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const Newsletter = () => {
+  return (
+    <section className="newsletter" aria-labelledby="newsletter">
+      <h2 id="newsletter">Newsletter / Suscripción</h2>
+      <input
+        type="email"
+        placeholder="Tu correo electrónico"
+        className="newsletter__field"
+        aria-label="Correo electrónico"
+      />
+    </section>
+  );
+};
+
+const SocialFeed = () => {
+  return (
+    <section className="social" aria-labelledby="social-feed">
+      <h2 id="social-feed">Feed Redes Sociales</h2>
+      <div className="social__feed" role="presentation">
+        <span></span>
+        <span></span>
+      </div>
+    </section>
+  );
+};
+
 const Footer = () => {
   return (
     <footer className="footer">
@@ -95,7 +201,13 @@ function App() {
   return (
     <div>
       <Header />
-      <main />
+      <main>
+        <Hero />
+        <RecentVideos />
+        <WrittenHighlights />
+        <Newsletter />
+        <SocialFeed />
+      </main>
       <Footer />
     </div>
   );

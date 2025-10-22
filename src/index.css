@@ -108,6 +108,337 @@ main {
   min-height: 50vh;
 }
 
+.hero {
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f8fafc;
+  padding: 1.5rem 2rem 2rem;
+}
+
+.hero__tabs {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  border: 1px solid #d1d5db;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.hero__tabs-left,
+.hero__tabs-right {
+  display: grid;
+  grid-auto-rows: 1fr;
+  border-color: #d1d5db;
+}
+
+.hero__tabs-left {
+  border-right: 1px solid #d1d5db;
+}
+
+.hero__tab-item {
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4b5563;
+  background-color: #ffffff;
+}
+
+.hero__tab-item:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.hero__tabs-right .hero__tab-item {
+  justify-content: center;
+}
+
+.hero__tab-item--active {
+  background-color: #f1f5f9;
+  color: #1d4ed8;
+}
+
+.hero__content {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #d1d5db;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  background-color: #ffffff;
+  box-shadow: 0 12px 30px -25px rgba(15, 23, 42, 0.35);
+}
+
+.hero__image {
+  background: linear-gradient(135deg, #e2e8f0, #cbd5f5);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hero__text h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.hero__text p {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.hero__text hr {
+  margin: 0.75rem 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+.hero__text ul {
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.hero__text li {
+  height: 6px;
+  background-color: #cbd5f5;
+  border-radius: 999px;
+}
+
+.hero__text li:nth-child(2) {
+  width: 85%;
+}
+
+.hero__text li:nth-child(3) {
+  width: 70%;
+}
+
+@media (max-width: 900px) {
+  .hero__tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__tabs-left {
+    grid-template-columns: repeat(2, 1fr);
+    border-right: none;
+  }
+
+  .hero__tab-item {
+    justify-content: center;
+    border-right: 1px solid #e5e7eb;
+  }
+
+  .hero__tab-item:nth-child(2n) {
+    border-right: none;
+  }
+
+  .hero__content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 1rem 1.25rem 1.5rem;
+  }
+
+  .hero__content {
+    padding: 1rem;
+  }
+
+  .hero__text h2 {
+    font-size: 1.35rem;
+  }
+}
+
+.videos {
+  padding: 2rem 2rem 2.5rem;
+  background-color: #ffffff;
+}
+
+.videos__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.videos__header h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.videos__grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.video-card {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  overflow: hidden;
+  box-shadow: 0 8px 20px -18px rgba(15, 23, 42, 0.4);
+}
+
+.video-card__thumbnail {
+  height: 140px;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5f5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.video-card__meta {
+  padding: 0.75rem 1rem;
+  background-color: #ffffff;
+  border-top: 1px solid #d1d5db;
+  font-size: 0.85rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.written {
+  padding: 2rem 2rem 2.5rem;
+  background-color: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+}
+
+.written__header h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+}
+
+.written__grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.written-card {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 24px -22px rgba(15, 23, 42, 0.4);
+}
+
+.written-card__image {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5f5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.written-card__content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+}
+
+.written-card__content p {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
+.newsletter {
+  padding: 2rem 2rem 2.5rem;
+  background-color: #ffffff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.newsletter h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.newsletter__field {
+  width: 100%;
+  max-width: 720px;
+  padding: 0.85rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: #f8fafc;
+}
+
+.newsletter__field:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.social {
+  padding: 2rem 2rem 3rem;
+  background-color: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.social h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+}
+
+.social__feed {
+  height: 160px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5f5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: #64748b;
+}
+
+.social__feed span {
+  display: block;
+  height: 6px;
+  width: 70%;
+  max-width: 420px;
+  border-radius: 999px;
+  background-color: rgba(100, 116, 139, 0.45);
+}
+
+.social__feed span:nth-child(2) {
+  width: 50%;
+}
+
 .footer {
   background-color: #0f172a;
   color: #f8fafc;
