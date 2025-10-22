@@ -71,9 +71,9 @@ const Hero = () => {
 
 const RecentVideos = () => {
   const videos = [
-    { id: 1, label: 'Miniatura', date: '15 oct 2025' },
-    { id: 2, label: 'Miniatura', date: '12 oct 2025' },
-    { id: 3, label: 'Miniatura', date: '08 oct 2025' },
+    { id: 1, title: 'MARKA E | Reporte agroindustrial', url: 'https://www.youtube.com/embed/MwqM5lto7hQ?autoplay=1&mute=1&rel=0&playsinline=1' },
+    { id: 2, title: 'MARKA E | Innovación en turismo rural', url: 'https://www.youtube.com/embed/J38Hgv9mUVU?autoplay=1&mute=1&rel=0&playsinline=1' },
+    { id: 3, title: 'MARKA E | Talento y sostenibilidad', url: 'https://www.youtube.com/embed/uEaZiaooeXA?autoplay=1&mute=1&rel=0&playsinline=1' }
   ];
 
   return (
@@ -84,8 +84,16 @@ const RecentVideos = () => {
       <div className="videos__grid">
         {videos.map((video) => (
           <article key={video.id} className="video-card">
-            <div className="video-card__thumbnail">{video.label}</div>
-            <div className="video-card__meta">{video.date}</div>
+            <div className="video-card__player">
+              <iframe
+                src={video.url}
+                title={video.title}
+                frameBorder="0"
+                allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
+            </div>
+            <div className="video-card__meta">{video.title}</div>
           </article>
         ))}
       </div>
@@ -97,14 +105,16 @@ const WrittenHighlights = () => {
   const articles = [
     {
       id: 1,
-      title: 'Título de la noticia',
-      excerpt: 'Extracto de la noticia',
+      title: 'Bci lidera ranking Most Innovative Companies',
+      excerpt: 'El banco fue reconocido como la empresa más innovadora en Chile por su ecosistema de innovación, IA generativa y colaboración con startups.',
+      image: '/images/bci/innovacion-bci.jpg'
     },
     {
       id: 2,
-      title: 'Título de la noticia',
-      excerpt: 'Extracto de la noticia',
-    },
+      title: 'Metodología del ranking valora impacto y cultura',
+      excerpt: 'La medición del ESE Business School destaca estrategia, cultura y procesos de innovación que refuerzan el liderazgo regional de Bci.',
+      image: '/images/bci/innovacion-bci.jpg'
+    }
   ];
 
   return (
@@ -115,7 +125,16 @@ const WrittenHighlights = () => {
       <div className="written__grid">
         {articles.map((article) => (
           <article key={article.id} className="written-card">
-            <div className="written-card__image">Imagen</div>
+            <div className="written-card__image">
+              <img
+                src={article.image}
+                alt={article.title}
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = '/images/fallback.svg';
+                }}
+              />
+            </div>
             <div className="written-card__content">
               <h3>{article.title}</h3>
               <p>{article.excerpt}</p>
@@ -142,12 +161,53 @@ const Newsletter = () => {
 };
 
 const SocialFeed = () => {
+  const posts = [
+    {
+      id: 1,
+      network: 'Instagram',
+      badge: 'IG',
+      handle: '@marka_e',
+      message: 'Recorriendo plantas productivas en Valdivia para documentar procesos innovadores de economía circular.',
+      time: 'Hace 2 horas'
+    },
+    {
+      id: 2,
+      network: 'LinkedIn',
+      badge: 'IN',
+      handle: 'MARKA E | Negocios',
+      message: 'Compartimos los aprendizajes del último Foro Empresarial de Puerto Montt sobre talento senior y digitalización.',
+      time: 'Hace 5 horas'
+    },
+    {
+      id: 3,
+      network: 'YouTube Shorts',
+      badge: 'YT',
+      handle: '@marka_e',
+      message: 'Mini reportaje: emprendedoras de turismo rural en Chiloé cuentan cómo diversifican su oferta todo el año.',
+      time: 'Ayer'
+    }
+  ];
+
   return (
     <section className="social" aria-labelledby="social-feed">
       <h2 id="social-feed">Feed Redes Sociales</h2>
-      <div className="social__feed" role="presentation">
-        <span></span>
-        <span></span>
+      <div className="social__feed" role="list">
+        {posts.map((post) => (
+          <article key={post.id} className="social-post" role="listitem">
+            <div className="social-post__header">
+              <span className={`social-post__badge social-post__badge--${post.badge.toLowerCase()}`}>{post.badge}</span>
+              <div className="social-post__meta">
+                <strong>{post.network}</strong>
+                <span>{post.handle}</span>
+              </div>
+              <span className="social-post__time">{post.time}</span>
+            </div>
+            <p className="social-post__message">{post.message}</p>
+            <button type="button" className="social-post__cta" aria-label={`Abrir publicación en ${post.network}`}>
+              Ver publicación
+            </button>
+          </article>
+        ))}
       </div>
     </section>
   );
