@@ -1,10 +1,51 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Routes, Route, Link, Outlet, useLocation } from 'react-router-dom';
 
 const Header = () => {
+  const [isAcuiculturaOpen, setIsAcuiculturaOpen] = useState(false);
+  const navRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) {
+        setIsAcuiculturaOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setIsAcuiculturaOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsAcuiculturaOpen(false);
+  }, [location.pathname]);
+
+  const toggleAcuicultura = () => {
+    setIsAcuiculturaOpen((prev) => !prev);
+  };
+
+  const closeSubmenu = () => {
+    setIsAcuiculturaOpen(false);
+  };
+
   return (
     <header className="header">
       <div className="header__top">
-        <div className="header__logo">marka_e</div>
+        <div className="header__logo">
+          <img src="/imagenes/logo.png" alt="marka_e" className="header__logo-image" />
+          <span className="sr-only">marka_e medio digital</span>
+        </div>
 
         <div className="header__search">
           <span className="header__search-icon" aria-hidden>🔍</span>
@@ -24,15 +65,61 @@ const Header = () => {
         </div>
       </div>
 
-      <nav className="header__nav" aria-label="Menú principal">
+      <nav
+        className="header__nav"
+        aria-label="Menú principal"
+        ref={navRef}
+        onMouseLeave={closeSubmenu}
+      >
         <ul>
-          <li><a href="#">Inicio</a></li>
-          <li><a href="#">Acuicultura</a></li>
-          <li><a href="#">Lechería</a></li>
-          <li><a href="#">Agricultura</a></li>
-          <li><a href="#">Turismo</a></li>
-          <li><a href="#">Multimedia</a></li>
-          <li><a href="#">Contacto</a></li>
+          <li>
+            <Link to="/" onClick={closeSubmenu}>
+              Inicio
+            </Link>
+          </li>
+          <li className={`header__nav-item--has-submenu ${isAcuiculturaOpen ? 'is-open' : ''}`}>
+            <button
+              type="button"
+              className={`header__nav-button ${isAcuiculturaOpen ? 'is-active' : ''}`}
+              aria-haspopup="true"
+              aria-expanded={isAcuiculturaOpen}
+              onClick={toggleAcuicultura}
+            >
+              Acuicultura
+            </button>
+            <ul className="header__submenu" aria-label="Submenú de Acuicultura">
+              <li>
+                <Link to="/acuicultura/salmonicultura" onClick={closeSubmenu}>
+                  Salmonicultura
+                </Link>
+              </li>
+              <li>
+                <Link to="/acuicultura/mitilicultura" onClick={closeSubmenu}>
+                  Mitilicultura
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <Link to="/lecheria" onClick={closeSubmenu}>
+              Lechería
+            </Link>
+          </li>
+          <li>
+            <Link to="/turismo/operadores" onClick={closeSubmenu}>
+              Turismo
+            </Link>
+          </li>
+          <li>
+            <Link to="/economia-desarrollo" onClick={closeSubmenu}>
+              Economía y desarrollo
+            </Link>
+          </li>
+          <li>
+            <Link to="/contacto" onClick={closeSubmenu}>
+              Contacto
+            </Link>
+          </li>
         </ul>
       </nav>
     </header>
@@ -105,16 +192,18 @@ const WrittenHighlights = () => {
   const articles = [
     {
       id: 1,
-      title: 'Bci lidera ranking Most Innovative Companies',
-      excerpt: 'El banco fue reconocido como la empresa más innovadora en Chile por su ecosistema de innovación, IA generativa y colaboración con startups.',
-      image: '/images/bci/innovacion-bci.jpg'
+      title: '¿Puede el entrenamiento con ejercicios de fuerza ser un aliado en el tratamiento del cáncer de mama?',
+      excerpt:
+        'El ensayo clínico Neo Strong, liderado por FALP junto a la UFRO y la Universidad Cruzeiro do Sul, evalúa cómo el entrenamiento de fuerza durante la quimioterapia ayuda a mujeres con cáncer de mama a mantener energía, masa muscular y calidad de vida.',
+      image: '/imagenes/Gissela Castillo (5) (1).png',
     },
     {
       id: 2,
-      title: 'Metodología del ranking valora impacto y cultura',
-      excerpt: 'La medición del ESE Business School destaca estrategia, cultura y procesos de innovación que refuerzan el liderazgo regional de Bci.',
-      image: '/images/bci/innovacion-bci.jpg'
-    }
+      title: 'Bci es reconocido como la empresa más innovadora en el sector bancario en Chile',
+      excerpt:
+        'El ranking Most Innovative Companies destacó a Bci por liderar la innovación bancaria con un ecosistema digital de pagos, alianzas con startups y procesos que generan valor a clientes y colaboradores.',
+      image: '/imagenes/premiacion1.png',
+    },
   ];
 
   return (
@@ -126,18 +215,12 @@ const WrittenHighlights = () => {
         {articles.map((article) => (
           <article key={article.id} className="written-card">
             <div className="written-card__image">
-              <img
-                src={article.image}
-                alt={article.title}
-                onError={(event) => {
-                  event.currentTarget.onerror = null;
-                  event.currentTarget.src = '/images/fallback.svg';
-                }}
-              />
+              <img src={article.image} alt={article.title} />
             </div>
             <div className="written-card__content">
               <h3>{article.title}</h3>
               <p>{article.excerpt}</p>
+              <a href="#" className="written-card__cta">Leer más</a>
             </div>
           </article>
         ))}
@@ -227,13 +310,12 @@ const Footer = () => {
         <div className="footer__section">
           <h4>Menú navegación completa</h4>
           <ul>
-            <li><a href="#">Inicio</a></li>
-            <li><a href="#">Acuicultura</a></li>
-            <li><a href="#">Lechería</a></li>
-            <li><a href="#">Agricultura</a></li>
-            <li><a href="#">Turismo</a></li>
-            <li><a href="#">Multimedia</a></li>
-            <li><a href="#">Contacto</a></li>
+            <li><Link to="/">Inicio</Link></li>
+            <li><Link to="/acuicultura/salmonicultura">Acuicultura</Link></li>
+            <li><Link to="/lecheria">Lechería</Link></li>
+            <li><Link to="/turismo/operadores">Turismo</Link></li>
+            <li><Link to="/economia-desarrollo">Economía y desarrollo</Link></li>
+            <li><Link to="/contacto">Contacto</Link></li>
           </ul>
         </div>
 
@@ -265,19 +347,205 @@ const Footer = () => {
   );
 };
 
+const Layout = () => (
+  <div>
+    <Header />
+    <main>
+      <Outlet />
+    </main>
+    <Footer />
+  </div>
+);
+
+const HomePage = () => (
+  <>
+    <Hero />
+    <RecentVideos />
+    <WrittenHighlights />
+    <Newsletter />
+    <SocialFeed />
+  </>
+);
+
+const SalmoniculturaPage = () => (
+  <section className="inner-page" aria-labelledby="salmonicultura-title">
+    <div className="inner-page__hero inner-page__hero--acuicultura">
+      <h1 id="salmonicultura-title">Salmonicultura</h1>
+      <p>
+        Reportes y entrevistas sobre producción de salmón, innovación en cultivo offshore, regulaciones y sostenibilidad
+        ambiental en el sur de Chile.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Últimas notas</h2>
+        <p>
+          Muy pronto publicaremos artículos destacados, fichas técnicas y material audiovisual con el que podrás seguir la
+          actualidad del sector.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
+const MitiliculturaPage = () => (
+  <section className="inner-page" aria-labelledby="mitilicultura-title">
+    <div className="inner-page__hero inner-page__hero--acuicultura">
+      <h1 id="mitilicultura-title">Mitilicultura</h1>
+      <p>
+        Cobertura de la industria de los choritos: exportaciones, certificaciones, proyectos asociativos y desarrollo
+        territorial en Chiloé y Aysén.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Agenda editorial</h2>
+        <p>
+          Estamos recopilando historias de productores, casos de innovación logística y oportunidades de inversión que
+          estarán disponibles en esta sección.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
+const LecheriaPage = () => (
+  <section className="inner-page" aria-labelledby="lecheria-title">
+    <div className="inner-page__hero inner-page__hero--negocios">
+      <h1 id="lecheria-title">Lechería</h1>
+      <p>
+        Historias, tendencias y reportes de la cadena láctea: productividad, bienestar animal, procesamiento y nuevos
+        mercados.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Próximamente</h2>
+        <p>
+          Aquí encontrarás entrevistas a cooperativas, análisis de precios y soluciones tecnológicas que impactan al
+          sector.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
+const TurismoOperadoresPage = () => (
+  <section className="inner-page" aria-labelledby="turismo-operadores-title">
+    <div className="inner-page__hero inner-page__hero--turismo">
+      <h1 id="turismo-operadores-title">Operadores turísticos</h1>
+      <p>
+        Novedades de agencias, tour operadores y experiencias guiadas que impulsan el desarrollo turístico sustentable en
+        el sur austral.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Historias en construcción</h2>
+        <p>
+          Estamos preparando un directorio interactivo y casos de éxito de operadores locales para ayudar a conectar la
+          oferta con nuevos visitantes.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
+const TurismoHoteleriaPage = () => (
+  <section className="inner-page" aria-labelledby="turismo-hoteleria-title">
+    <div className="inner-page__hero inner-page__hero--turismo">
+      <h1 id="turismo-hoteleria-title">Hotelería y gastronomía</h1>
+      <p>
+        Cobertura de alojamientos, restaurantes, innovación culinaria y capacitación de capital humano para fortalecer la
+        identidad gastronómica de la macrozona sur.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Guías de referencia</h2>
+        <p>
+          Próximamente publicaremos rankings, reseñas y notas multimedia con chefs, hoteleros y emprendimientos locales.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
+const TurismoOfertaPage = () => (
+  <section className="inner-page" aria-labelledby="turismo-oferta-title">
+    <div className="inner-page__hero inner-page__hero--turismo">
+      <h1 id="turismo-oferta-title">Oferta turística</h1>
+      <p>
+        Agenda de panoramas, rutas y productos turísticos innovadores que ofrece la Patagonia y el sur de Chile durante
+        todo el año.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Próximos lanzamientos</h2>
+        <p>
+          Estamos organizando un catálogo de experiencias y alianzas con municipios para impulsar el turismo territorial.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
+const EconomiaPage = () => (
+  <section className="inner-page" aria-labelledby="economia-title">
+    <div className="inner-page__hero inner-page__hero--negocios">
+      <h1 id="economia-title">Economía y desarrollo</h1>
+      <p>
+        Análisis macro y microeconómicos, políticas públicas y proyectos estratégicos que impactan al crecimiento regional
+        del sur de Chile.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Notas en preparación</h2>
+        <p>
+          Pronto compartiremos informes de inversión, financiamiento para pymes y entrevistas con líderes empresariales y
+          académicos.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
+const ContactoPage = () => (
+  <section className="inner-page" aria-labelledby="contacto-title">
+    <div className="inner-page__hero inner-page__hero--contacto">
+      <h1 id="contacto-title">Contacto</h1>
+      <p>
+        Escríbenos para prensa, pauta comercial o alianzas estratégicas. Nuestro equipo responderá a la brevedad.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Datos de contacto</h2>
+        <p>Email: hola@marka-e.cl</p>
+        <p>Teléfono: +56 9 5555 5555</p>
+        <p>Dirección: Puerto Varas, Región de Los Lagos.</p>
+      </article>
+    </div>
+  </section>
+);
+
 function App() {
   return (
-    <div>
-      <Header />
-      <main>
-        <Hero />
-        <RecentVideos />
-        <WrittenHighlights />
-        <Newsletter />
-        <SocialFeed />
-      </main>
-      <Footer />
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="acuicultura/salmonicultura" element={<SalmoniculturaPage />} />
+        <Route path="acuicultura/mitilicultura" element={<MitiliculturaPage />} />
+        <Route path="lecheria" element={<LecheriaPage />} />
+        <Route path="turismo/operadores" element={<TurismoOperadoresPage />} />
+        <Route path="turismo/hoteleria-gastronomia" element={<TurismoHoteleriaPage />} />
+        <Route path="turismo/oferta" element={<TurismoOfertaPage />} />
+        <Route path="economia-desarrollo" element={<EconomiaPage />} />
+        <Route path="contacto" element={<ContactoPage />} />
+      </Route>
+    </Routes>
   );
 }
 
