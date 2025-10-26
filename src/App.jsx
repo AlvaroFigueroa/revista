@@ -1,42 +1,63 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Routes, Route, Link, Outlet, useLocation } from 'react-router-dom';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Routes, Route, Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 const Header = () => {
-  const [isAcuiculturaOpen, setIsAcuiculturaOpen] = useState(false);
+  const [activeSubmenu, setActiveSubmenu] = useState(null);
   const navRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const menuItems = useMemo(
+    () => [
+      { label: 'Inicio', path: '/' },
+      {
+        label: 'Acuicultura',
+        key: 'acuicultura',
+        submenu: [
+          { label: 'Salmonicultura', path: '/acuicultura/salmonicultura' },
+          { label: 'Mitilicultura', path: '/acuicultura/mitilicultura' },
+        ],
+      },
+      { label: 'Lechería', path: '/lecheria' },
+      { label: 'Turismo', path: '/turismo/operadores' },
+      { label: 'Economía y desarrollo', path: '/economia-desarrollo' },
+      { label: 'Contacto', path: '/contacto' },
+    ],
+    []
+  );
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handlePointerDown = (event) => {
       if (navRef.current && !navRef.current.contains(event.target)) {
-        setIsAcuiculturaOpen(false);
+        setActiveSubmenu(null);
       }
     };
 
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
-        setIsAcuiculturaOpen(false);
+        setActiveSubmenu(null);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleEscape);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleEscape);
     };
   }, []);
 
   useEffect(() => {
-    setIsAcuiculturaOpen(false);
+    setActiveSubmenu(null);
   }, [location.pathname]);
 
-  const toggleAcuicultura = () => {
-    setIsAcuiculturaOpen((prev) => !prev);
+  const toggleSubmenu = (key) => {
+    setActiveSubmenu((current) => (current === key ? null : key));
   };
 
-  const closeSubmenu = () => {
-    setIsAcuiculturaOpen(false);
+  const handleNavigate = (path) => {
+    setActiveSubmenu(null);
+    navigate(path);
   };
 
   return (
@@ -65,61 +86,53 @@ const Header = () => {
         </div>
       </div>
 
-      <nav
-        className="header__nav"
-        aria-label="Menú principal"
-        ref={navRef}
-        onMouseLeave={closeSubmenu}
-      >
+      <nav className="header__nav" aria-label="Menú principal" ref={navRef}>
         <ul>
-          <li>
-            <Link to="/" onClick={closeSubmenu}>
-              Inicio
-            </Link>
-          </li>
-          <li className={`header__nav-item--has-submenu ${isAcuiculturaOpen ? 'is-open' : ''}`}>
-            <button
-              type="button"
-              className={`header__nav-button ${isAcuiculturaOpen ? 'is-active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={isAcuiculturaOpen}
-              onClick={toggleAcuicultura}
-            >
-              Acuicultura
-            </button>
-            <ul className="header__submenu" aria-label="Submenú de Acuicultura">
-              <li>
-                <Link to="/acuicultura/salmonicultura" onClick={closeSubmenu}>
-                  Salmonicultura
+          {menuItems.map((item) => {
+            if (item.submenu) {
+              const isOpen = activeSubmenu === item.key;
+              return (
+                <li
+                  key={item.label}
+                  className={`header__nav-item--has-submenu ${isOpen ? 'is-open' : ''}`}
+                >
+                  <button
+                    type="button"
+                    className={`header__nav-button ${isOpen ? 'is-active' : ''}`}
+                    aria-haspopup="true"
+                    aria-expanded={isOpen}
+                    aria-controls={`submenu-${item.key}`}
+                    onClick={() => toggleSubmenu(item.key)}
+                  >
+                    {item.label}
+                  </button>
+                  {isOpen ? (
+                    <ul
+                      id={`submenu-${item.key}`}
+                      className="header__submenu"
+                      aria-label={`Submenú de ${item.label}`}
+                    >
+                      {item.submenu.map((subItem) => (
+                        <li key={subItem.label}>
+                          <button type="button" onClick={() => handleNavigate(subItem.path)}>
+                            {subItem.label}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            }
+
+            return (
+              <li key={item.label}>
+                <Link to={item.path} onClick={() => setActiveSubmenu(null)}>
+                  {item.label}
                 </Link>
               </li>
-              <li>
-                <Link to="/acuicultura/mitilicultura" onClick={closeSubmenu}>
-                  Mitilicultura
-                </Link>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <Link to="/lecheria" onClick={closeSubmenu}>
-              Lechería
-            </Link>
-          </li>
-          <li>
-            <Link to="/turismo/operadores" onClick={closeSubmenu}>
-              Turismo
-            </Link>
-          </li>
-          <li>
-            <Link to="/economia-desarrollo" onClick={closeSubmenu}>
-              Economía y desarrollo
-            </Link>
-          </li>
-          <li>
-            <Link to="/contacto" onClick={closeSubmenu}>
-              Contacto
-            </Link>
-          </li>
+            );
+          })}
         </ul>
       </nav>
     </header>
