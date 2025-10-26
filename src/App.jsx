@@ -19,7 +19,15 @@ const Header = () => {
         ],
       },
       { label: 'Lechería', path: '/lecheria' },
-      { label: 'Turismo', path: '/turismo/operadores' },
+      {
+        label: 'Turismo',
+        key: 'turismo',
+        submenu: [
+          { label: 'Operadores turísticos', path: '/turismo/operadores' },
+          { label: 'Hotelería y gastronomía', path: '/turismo/hoteleria-gastronomia' },
+          { label: 'Oferta turística', path: '/turismo/oferta' },
+        ],
+      },
       { label: 'Economía y desarrollo', path: '/economia-desarrollo' },
       { label: 'Contacto', path: '/contacto' },
     ],
