@@ -369,7 +369,7 @@ const Footer = () => {
 };
 
 const Layout = () => (
-  <div>
+  <div className="app-shell">
     <Header />
     <main>
       <Outlet />
@@ -538,15 +538,54 @@ const ContactoPage = () => (
     <div className="inner-page__hero inner-page__hero--contacto">
       <h1 id="contacto-title">Contacto</h1>
       <p>
-        Escríbenos para prensa, pauta comercial o alianzas estratégicas. Nuestro equipo responderá a la brevedad.
+        Completa el formulario o escríbenos directamente. Estamos disponibles para alianzas, pauta y consultas
+        comerciales.
       </p>
     </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Datos de contacto</h2>
-        <p>Email: hola@marka-e.cl</p>
-        <p>Teléfono: +56 9 5555 5555</p>
-        <p>Dirección: Puerto Varas, Región de Los Lagos.</p>
+    <div className="inner-page__content inner-page__content--split">
+      <article className="contact-card">
+        <h2>Información de contacto</h2>
+        <ul className="contact-details" aria-label="Datos de contacto de MARKA E">
+          <li>
+            <span className="contact-details__label">Correo</span>
+            <a href="mailto:contacto@markae.cl">contacto@markae.cl</a>
+          </li>
+          <li>
+            <span className="contact-details__label">Teléfono</span>
+            <a href="tel:+56962636276">+56 9 6263 6276</a>
+          </li>
+        </ul>
+      </article>
+
+      <article className="contact-form-card">
+        <h2>Escríbenos</h2>
+        <form className="contact-form" action="/contacto.php" method="POST">
+          <div className="contact-form__group">
+            <label htmlFor="contact-name">Nombre completo</label>
+            <input id="contact-name" name="name" type="text" placeholder="Tu nombre" required />
+          </div>
+          <div className="contact-form__group">
+            <label htmlFor="contact-email">Correo electrónico</label>
+            <input id="contact-email" name="email" type="email" placeholder="tu@correo.com" required />
+          </div>
+          <div className="contact-form__group">
+            <label htmlFor="contact-company">Empresa / organización</label>
+            <input id="contact-company" name="company" type="text" placeholder="Nombre de tu empresa" />
+          </div>
+          <div className="contact-form__group">
+            <label htmlFor="contact-message">Mensaje</label>
+            <textarea
+              id="contact-message"
+              name="message"
+              rows="5"
+              placeholder="Cuéntanos en qué podemos ayudarte"
+              required
+            ></textarea>
+          </div>
+          <button type="submit" className="contact-form__submit">
+            Enviar mensaje
+          </button>
+        </form>
       </article>
     </div>
   </section>
