@@ -29,6 +29,7 @@ const Header = () => {
         ],
       },
       { label: 'Economía y desarrollo', path: '/economia-desarrollo' },
+      { label: "PyME's", path: '/pymes' },
       { label: 'Contacto', path: '/contacto' },
     ],
     []
@@ -147,9 +148,18 @@ const Header = () => {
   );
 };
 
+const BannerSlot = ({ label }) => (
+  <section className="banner-slot" aria-label={label} role="complementary">
+    <span>{label}</span>
+  </section>
+);
+
 const Hero = () => {
   return (
     <section className="hero" aria-labelledby="hero-featured">
+      <p className="section-label" aria-hidden>
+        Noticia destacada
+      </p>
       <div className="hero__content">
         <div className="hero__media" aria-label="Video destacado">
           <div className="hero__video">
@@ -163,13 +173,15 @@ const Hero = () => {
           </div>
         </div>
         <div className="hero__text">
-          <h2 id="hero-featured">MARKA E: Plataforma digital del sur de Chile</h2>
-          <p>Conoce el proyecto informativo de Agencia MARKA PM que reúne noticias, entrevistas y análisis del ecosistema empresarial sureño, con foco en innovación, sostenibilidad y desarrollo regional.</p>
+          <h2 id="hero-featured">Plan piloto de lechería inteligente reduce 18% la huella hídrica en Llanquihue</h2>
+          <p>
+            La cooperativa Láctea Austral lanzó un programa de monitoreo hídrico y alimentación inteligente que incorpora sensores IoT, análisis predictivo y biodigestores para transformar la gestión de agua en predios del sur de Chile.
+          </p>
           <hr />
           <ul className="hero__highlights">
-            <li><span>•</span> Empresas sureñas lanzan agenda 2025 para digitalizar procesos productivos.</li>
-            <li><span>•</span> Pymes turísticas de La Araucanía apuestan por experiencias sostenibles con apoyo de MARKA E.</li>
-            <li><span>•</span> Foro empresarial en Puerto Montt reúne líderes para debatir innovación y capital humano.</li>
+            <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
+            <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
+            <li><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
           </ul>
         </div>
       </div>
@@ -181,7 +193,12 @@ const RecentVideos = () => {
   const videos = [
     { id: 1, title: 'MARKA E | Reporte agroindustrial', url: 'https://www.youtube.com/embed/MwqM5lto7hQ?autoplay=1&mute=1&rel=0&playsinline=1' },
     { id: 2, title: 'MARKA E | Innovación en turismo rural', url: 'https://www.youtube.com/embed/J38Hgv9mUVU?autoplay=1&mute=1&rel=0&playsinline=1' },
-    { id: 3, title: 'MARKA E | Talento y sostenibilidad', url: 'https://www.youtube.com/embed/uEaZiaooeXA?autoplay=1&mute=1&rel=0&playsinline=1' }
+    { id: 3, title: 'MARKA E | Talento y sostenibilidad', url: 'https://www.youtube.com/embed/uEaZiaooeXA?autoplay=1&mute=1&rel=0&playsinline=1' },
+    { id: 4, title: 'MARKA E | Transformación digital PyME', url: 'https://www.youtube.com/embed/MwqM5lto7hQ?autoplay=1&mute=1&rel=0&playsinline=1' },
+    { id: 5, title: 'MARKA E | Economía circular en el sur', url: 'https://www.youtube.com/embed/J38Hgv9mUVU?autoplay=1&mute=1&rel=0&playsinline=1' },
+    { id: 6, title: 'MARKA E | Historias de exportación', url: 'https://www.youtube.com/embed/uEaZiaooeXA?autoplay=1&mute=1&rel=0&playsinline=1' },
+    { id: 7, title: 'MARKA E | Claves de financiamiento', url: 'https://www.youtube.com/embed/MwqM5lto7hQ?autoplay=1&mute=1&rel=0&playsinline=1' },
+    { id: 8, title: 'MARKA E | Innovación agroalimentaria', url: 'https://www.youtube.com/embed/J38Hgv9mUVU?autoplay=1&mute=1&rel=0&playsinline=1' }
   ];
 
   return (
@@ -229,6 +246,9 @@ const WrittenHighlights = () => {
 
   return (
     <section className="written" aria-labelledby="written-highlights">
+      <p className="section-label" aria-hidden>
+        Otras noticias
+      </p>
       <div className="written__header">
         <h2 id="written-highlights">Noticias escritas destacadas</h2>
       </div>
@@ -251,15 +271,88 @@ const WrittenHighlights = () => {
 };
 
 const Newsletter = () => {
+  const [formData, setFormData] = useState({ name: '', email: '' });
+  const [status, setStatus] = useState('idle');
+  const [message, setMessage] = useState('');
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setStatus('loading');
+    setMessage('');
+
+    try {
+      const response = await fetch('/suscripcion.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(formData).toString(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al registrar la suscripción');
+      }
+
+      const text = await response.text();
+      setStatus('success');
+      setMessage(text || '¡Gracias por suscribirte! Revisa tu correo para confirmar.');
+      setFormData({ name: '', email: '' });
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+      setMessage('No pudimos registrar tu suscripción. Inténtalo nuevamente más tarde.');
+    }
+  };
+
   return (
     <section className="newsletter" aria-labelledby="newsletter">
       <h2 id="newsletter">Newsletter / Suscripción</h2>
-      <input
-        type="email"
-        placeholder="Tu correo electrónico"
-        className="newsletter__field"
-        aria-label="Correo electrónico"
-      />
+      <p className="newsletter__intro">
+        Recibe un resumen mensual con entrevistas, reportajes y agenda de eventos del ecosistema empresarial del sur de Chile.
+      </p>
+      <form className="newsletter__form" onSubmit={handleSubmit}>
+        <div className="newsletter__group">
+          <label htmlFor="newsletter-name" className="sr-only">
+            Nombre completo
+          </label>
+          <input
+            id="newsletter-name"
+            name="name"
+            type="text"
+            placeholder="Tu nombre"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="newsletter__group">
+          <label htmlFor="newsletter-email" className="sr-only">
+            Correo electrónico
+          </label>
+          <input
+            id="newsletter-email"
+            name="email"
+            type="email"
+            placeholder="tu@correo.com"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button type="submit" className="newsletter__submit" disabled={status === 'loading'}>
+          {status === 'loading' ? 'Enviando…' : 'Suscribirme'}
+        </button>
+      </form>
+      {status !== 'idle' && message ? (
+        <p className={`newsletter__message newsletter__message--${status}`} role="status">
+          {message}
+        </p>
+      ) : null}
     </section>
   );
 };
@@ -336,6 +429,7 @@ const Footer = () => {
             <li><Link to="/lecheria">Lechería</Link></li>
             <li><Link to="/turismo/operadores">Turismo</Link></li>
             <li><Link to="/economia-desarrollo">Economía y desarrollo</Link></li>
+            <li><Link to="/pymes">PyME's</Link></li>
             <li><Link to="/contacto">Contacto</Link></li>
           </ul>
         </div>
@@ -380,7 +474,9 @@ const Layout = () => (
 
 const HomePage = () => (
   <>
+    <BannerSlot label="Espacio Banner 1" />
     <Hero />
+    <BannerSlot label="Espacio Banner 2" />
     <RecentVideos />
     <WrittenHighlights />
     <Newsletter />
@@ -512,6 +608,27 @@ const TurismoOfertaPage = () => (
   </section>
 );
 
+const PymesPage = () => (
+  <section className="inner-page" aria-labelledby="pymes-title">
+    <div className="inner-page__hero inner-page__hero--negocios">
+      <h1 id="pymes-title">PyME's</h1>
+      <p>
+        Reportajes, herramientas y casos de innovación aplicada al desarrollo de pequeñas y medianas empresas del sur de
+        Chile.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Contenido en preparación</h2>
+        <p>
+          Próximamente encontrarás guías de financiamiento, historias de emprendimiento regional y directorios de apoyo
+          para PyME's.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
 const EconomiaPage = () => (
   <section className="inner-page" aria-labelledby="economia-title">
     <div className="inner-page__hero inner-page__hero--negocios">
@@ -602,6 +719,7 @@ function App() {
         <Route path="turismo/operadores" element={<TurismoOperadoresPage />} />
         <Route path="turismo/hoteleria-gastronomia" element={<TurismoHoteleriaPage />} />
         <Route path="turismo/oferta" element={<TurismoOfertaPage />} />
+        <Route path="pymes" element={<PymesPage />} />
         <Route path="economia-desarrollo" element={<EconomiaPage />} />
         <Route path="contacto" element={<ContactoPage />} />
       </Route>
