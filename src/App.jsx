@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Routes, Route, Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import AuthPage from './pages/AuthPage';
 
 const Header = () => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const menuItems = useMemo(
     () => [
@@ -69,6 +73,19 @@ const Header = () => {
     navigate(path);
   };
 
+  const goToAuth = () => {
+    navigate('/auth');
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <header className="header">
       <div className="header__top">
@@ -83,15 +100,25 @@ const Header = () => {
         </div>
 
         <div className="header__actions" aria-label="Acciones del usuario">
-          <button className="header__action" aria-label="Buscar">
-            🔍
-          </button>
-          <button className="header__action" aria-label="Notificaciones">
-            🔔
-          </button>
-          <button className="header__action" aria-label="Perfil">
-            👤
-          </button>
+          {user ? (
+            <>
+              <span className="header__user" aria-live="polite">
+                Hola, {user.displayName || user.email}
+              </span>
+              <button
+                type="button"
+                className="header__auth-button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+              >
+                {isLoggingOut ? 'Cerrando…' : 'Cerrar sesión'}
+              </button>
+            </>
+          ) : (
+            <button type="button" className="header__auth-button" onClick={goToAuth}>
+              Iniciar sesión
+            </button>
+          )}
         </div>
       </div>
 
@@ -722,6 +749,7 @@ function App() {
         <Route path="pymes" element={<PymesPage />} />
         <Route path="economia-desarrollo" element={<EconomiaPage />} />
         <Route path="contacto" element={<ContactoPage />} />
+        <Route path="auth" element={<AuthPage />} />
       </Route>
     </Routes>
   );
