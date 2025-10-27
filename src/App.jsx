@@ -206,6 +206,7 @@ const Hero = () => {
           </p>
           <hr />
           <ul className="hero__highlights">
+            <li><span>•</span> Otras noticias</li>
             <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
             <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
             <li><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
