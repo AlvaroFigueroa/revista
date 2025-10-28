@@ -3,6 +3,101 @@ import { Routes, Route, Link, Outlet, useLocation, useNavigate } from 'react-rou
 import { useAuth } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
 
+const FinancialTicker = () => {
+  const [indicators, setIndicators] = useState(null);
+  const [status, setStatus] = useState('loading');
+
+  const normalizeValue = (raw) => {
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchIndicators = async () => {
+      try {
+        const response = await fetch('https://mindicador.cl/api');
+        if (!response.ok) {
+          throw new Error('Respuesta inválida del servicio de indicadores');
+        }
+
+        const json = await response.json();
+        if (!isMounted) return;
+
+        setIndicators({
+          uf: normalizeValue(json?.uf?.valor),
+          dolar: normalizeValue(json?.dolar?.valor),
+          euro: normalizeValue(json?.euro?.valor),
+        });
+        setStatus('ready');
+      } catch (error) {
+        if (!isMounted) return;
+        console.error('No pudimos obtener indicadores financieros', error);
+        setStatus('error');
+      }
+    };
+
+    fetchIndicators();
+    const intervalId = window.setInterval(fetchIndicators, 15 * 60 * 1000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  const ufFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    []
+  );
+
+  const clpFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }),
+    []
+  );
+
+  const formatCurrency = (value, formatter) =>
+    typeof value === 'number' ? formatter.format(value) : '--';
+
+  if (status === 'ready' && indicators) {
+    return (
+      <div className="financial-ticker" aria-live="polite">
+        <span className="financial-ticker__item">
+          <span className="financial-ticker__label">UF</span>
+          <span>{formatCurrency(indicators.uf, ufFormatter)}</span>
+        </span>
+        <span className="financial-ticker__item">
+          <span className="financial-ticker__label">USD</span>
+          <span>{formatCurrency(indicators.dolar, clpFormatter)}</span>
+        </span>
+        <span className="financial-ticker__item">
+          <span className="financial-ticker__label">EUR</span>
+          <span>{formatCurrency(indicators.euro, clpFormatter)}</span>
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="financial-ticker financial-ticker--status" aria-live="polite">
+      <span>{status === 'error' ? 'Indicadores no disponibles' : 'Cargando indicadores…'}</span>
+    </div>
+  );
+};
+
 const Header = () => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -97,6 +192,10 @@ const Header = () => {
         <div className="header__search">
           <span className="header__search-icon" aria-hidden>🔍</span>
           <input type="search" placeholder="Buscar" aria-label="Buscar en la revista" />
+        </div>
+
+        <div className="header__ticker" aria-label="Indicadores financieros del día">
+          <FinancialTicker />
         </div>
 
         <div className="header__actions" aria-label="Acciones del usuario">
@@ -205,6 +304,9 @@ const Hero = () => {
             La cooperativa Láctea Austral lanzó un programa de monitoreo hídrico y alimentación inteligente que incorpora sensores IoT, análisis predictivo y biodigestores para transformar la gestión de agua en predios del sur de Chile.
           </p>
           <hr />
+          <div className="hero__highlights-header">
+            <span className="hero__highlights-label">Otras noticias</span>
+          </div>
           <ul className="hero__highlights">
             <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
             <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
@@ -497,7 +599,7 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer__grid">
         <div className="footer__brand">
-          <h3>marka_e</h3>
+          <img src="/imagenes/logo.png" alt="marka_e medio digital" className="footer__logo" />
           <p>
             Plataforma de noticias y análisis sobre acuicultura, lechería, agricultura y turismo en América Latina.
           </p>
@@ -538,7 +640,16 @@ const Footer = () => {
 
       <div className="footer__bottom">
         <span>© {new Date().getFullYear()} marka_e. Todos los derechos reservados.</span>
-        <span>Desarrollado para profesionales del sector agro y turismo sostenible.</span>
+        <span>
+          Desarrollado por{' '}
+          <a href="https://www.agenciamarkae.cl" target="_blank" rel="noopener noreferrer">
+            Agencia Marka
+          </a>{' '}
+          &amp;{' '}
+          <a href="https://www.codecland.com" target="_blank" rel="noopener noreferrer">
+            Codecland
+          </a>
+        </span>
       </div>
     </footer>
   );
