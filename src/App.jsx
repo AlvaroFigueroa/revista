@@ -206,7 +206,6 @@ const Hero = () => {
           </p>
           <hr />
           <ul className="hero__highlights">
-            <li><span>•</span> Otras noticias</li>
             <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
             <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
             <li><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
@@ -270,15 +269,68 @@ const WrittenHighlights = () => {
         'El ranking Most Innovative Companies destacó a Bci por liderar la innovación bancaria con un ecosistema digital de pagos, alianzas con startups y procesos que generan valor a clientes y colaboradores.',
       image: '/imagenes/premiacion1.png',
     },
+    {
+      id: 3,
+      title: 'Cooperación público-privada financiará 40 proyectos agroindustriales en Los Lagos',
+      excerpt:
+        'Corfo y Sercotec anunciaron un fondo colaborativo de $2.500 millones para impulsar plantas procesadoras, innovación alimentaria y tecnologías limpias en la macrozona sur.',
+      image: '/imagenes/premiacion1.png',
+    },
+    {
+      id: 4,
+      title: 'Turismo rural: alianzas comunitarias amplían la oferta durante la temporada baja',
+      excerpt:
+        'Municipios y cámaras de turismo lanzaron circuitos de otoño-invierno que combinan gastronomía local, termas y experiencias culturales en siete comunas del sur austral.',
+      image: '/imagenes/Gissela Castillo (5) (1).png',
+    },
+    {
+      id: 5,
+      title: 'Startups logísticas de la Patagonia levantan inversión semilla para expandirse a Perú',
+      excerpt:
+        'Tres empresas chilenas de trazabilidad en frío y transporte multimodal cerraron rondas por US$6 millones para escalar servicios a exportadores de alimentos.',
+      image: '/imagenes/premiacion1.png',
+    },
+    {
+      id: 6,
+      title: 'Programa de eficiencia energética permitirá reducir costos a 120 PyME’s del sur',
+      excerpt:
+        'La Agencia de Sustentabilidad y Cambio Climático instalará sensores inteligentes y capacitará equipos internos para optimizar consumo eléctrico en manufactura y agroindustria.',
+      image: '/imagenes/Gissela Castillo (5) (1).png',
+    },
+    {
+      id: 7,
+      title: 'Fondos de innovación apoyan bioplásticos desarrollados con desechos lecheros',
+      excerpt:
+        'Investigadores de la Universidad Austral lideran un consorcio que transforma suero y residuos orgánicos en materiales compostables para packaging alimentario.',
+      image: '/imagenes/premiacion1.png',
+    },
+    {
+      id: 8,
+      title: 'Más de 60 emprendedoras se gradúan del programa Ruta Exportadora en Chiloé',
+      excerpt:
+        'Sercotec y ProChile acompañaron a microempresas turísticas y gastronómicas para abrir mercados internacionales mediante vitrinas digitales y asesoría logística.',
+      image: '/imagenes/Gissela Castillo (5) (1).png',
+    },
+    {
+      id: 9,
+      title: 'Puerto Montt habilita centro de formación dual para talento tecnológico regional',
+      excerpt:
+        'La iniciativa reúne a empresas TI, liceos técnicos y universidades para acelerar carreras en programación, data analytics y ciberseguridad con prácticas pagadas.',
+      image: '/imagenes/premiacion1.png',
+    },
+    {
+      id: 10,
+      title: 'Exportadores frutícolas estrenan plataforma blockchain para trazabilidad en destino',
+      excerpt:
+        'La Asociación de Productores del sur implementó un sistema de bloques que certifica calidad y cadena de frío en contenedores con destino a Estados Unidos y Europa.',
+      image: '/imagenes/Gissela Castillo (5) (1).png',
+    },
   ];
 
   return (
     <section className="written" aria-labelledby="written-highlights">
-      <p className="section-label" aria-hidden>
-        Otras noticias
-      </p>
       <div className="written__header">
-        <h2 id="written-highlights">Noticias escritas destacadas</h2>
+        <h2 id="written-highlights">Otras noticias y comunicados de prensa</h2>
       </div>
       <div className="written__grid">
         {articles.map((article) => (
@@ -339,98 +391,100 @@ const Newsletter = () => {
 
   return (
     <section className="newsletter" aria-labelledby="newsletter">
-      <h2 id="newsletter">Newsletter / Suscripción</h2>
-      <p className="newsletter__intro">
-        Recibe un resumen mensual con entrevistas, reportajes y agenda de eventos del ecosistema empresarial del sur de Chile.
-      </p>
-      <form className="newsletter__form" onSubmit={handleSubmit}>
-        <div className="newsletter__group">
-          <label htmlFor="newsletter-name" className="sr-only">
-            Nombre completo
-          </label>
-          <input
-            id="newsletter-name"
-            name="name"
-            type="text"
-            placeholder="Tu nombre"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
+      <div className="newsletter__layout">
+        <div className="newsletter__content">
+          <h2 id="newsletter">Newsletter / Suscripción gratis</h2>
+          <p className="newsletter__intro">
+            Recibe un resumen mensual con entrevistas, reportajes y agenda de eventos del ecosistema empresarial del sur de Chile.
+          </p>
+          <form className="newsletter__form" onSubmit={handleSubmit}>
+            <div className="newsletter__group">
+              <label htmlFor="newsletter-name" className="sr-only">
+                Nombre completo
+              </label>
+              <input
+                id="newsletter-name"
+                name="name"
+                type="text"
+                placeholder="Tu nombre"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="newsletter__group">
+              <label htmlFor="newsletter-email" className="sr-only">
+                Correo electrónico
+              </label>
+              <input
+                id="newsletter-email"
+                name="email"
+                type="email"
+                placeholder="tu@correo.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <button type="submit" className="newsletter__submit" disabled={status === 'loading'}>
+              {status === 'loading' ? 'Enviando…' : 'Suscribirme'}
+            </button>
+          </form>
+          {status !== 'idle' && message ? (
+            <p className={`newsletter__message newsletter__message--${status}`} role="status">
+              {message}
+            </p>
+          ) : null}
         </div>
-        <div className="newsletter__group">
-          <label htmlFor="newsletter-email" className="sr-only">
-            Correo electrónico
-          </label>
-          <input
-            id="newsletter-email"
-            name="email"
-            type="email"
-            placeholder="tu@correo.com"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" className="newsletter__submit" disabled={status === 'loading'}>
-          {status === 'loading' ? 'Enviando…' : 'Suscribirme'}
-        </button>
-      </form>
-      {status !== 'idle' && message ? (
-        <p className={`newsletter__message newsletter__message--${status}`} role="status">
-          {message}
-        </p>
-      ) : null}
+        <aside className="newsletter__banner" aria-label="Espacio disponible para banner publicitario">
+          <span>Espacio para banner</span>
+        </aside>
+      </div>
     </section>
   );
 };
 
-const SocialFeed = () => {
-  const posts = [
+const EventsFeed = () => {
+  const events = [
     {
       id: 1,
-      network: 'Instagram',
-      badge: 'IG',
-      handle: '@marka_e',
-      message: 'Recorriendo plantas productivas en Valdivia para documentar procesos innovadores de economía circular.',
-      time: 'Hace 2 horas'
+      name: 'Agenda PyME Los Lagos',
+      date: '4 noviembre, 09:00',
+      dateTime: '2025-11-04T09:00:00-03:00',
+      location: 'Puerto Varas · Centro de Eventos Arena',
+      description: 'Encuentro para PyME’s del agro y turismo con rondas de negocios, asesoría financiera y talleres prácticos.'
     },
     {
       id: 2,
-      network: 'LinkedIn',
-      badge: 'IN',
-      handle: 'MARKA E | Negocios',
-      message: 'Compartimos los aprendizajes del último Foro Empresarial de Puerto Montt sobre talento senior y digitalización.',
-      time: 'Hace 5 horas'
+      name: 'Cumbre Innovación Agroalimentaria',
+      date: '7 noviembre, 10:30',
+      dateTime: '2025-11-07T10:30:00-03:00',
+      location: 'Valdivia · Parque Saval',
+      description: 'Panel sobre biotecnología aplicada, sustentabilidad hídrica y nuevos modelos de exportación para el sur de Chile.'
     },
     {
       id: 3,
-      network: 'YouTube Shorts',
-      badge: 'YT',
-      handle: '@marka_e',
-      message: 'Mini reportaje: emprendedoras de turismo rural en Chiloé cuentan cómo diversifican su oferta todo el año.',
-      time: 'Ayer'
+      name: 'Seminario Talento Digital Austral',
+      date: '12 noviembre, 15:00',
+      dateTime: '2025-11-12T15:00:00-03:00',
+      location: 'Online · Transmisión en vivo',
+      description: 'Foro con empresas tecnológicas y universidades para abordar reconversión laboral, IA generativa y ciberseguridad.'
     }
   ];
 
   return (
-    <section className="social" aria-labelledby="social-feed">
-      <h2 id="social-feed">Feed Redes Sociales</h2>
-      <div className="social__feed" role="list">
-        {posts.map((post) => (
-          <article key={post.id} className="social-post" role="listitem">
-            <div className="social-post__header">
-              <span className={`social-post__badge social-post__badge--${post.badge.toLowerCase()}`}>{post.badge}</span>
-              <div className="social-post__meta">
-                <strong>{post.network}</strong>
-                <span>{post.handle}</span>
-              </div>
-              <span className="social-post__time">{post.time}</span>
-            </div>
-            <p className="social-post__message">{post.message}</p>
-            <button type="button" className="social-post__cta" aria-label={`Abrir publicación en ${post.network}`}>
-              Ver publicación
-            </button>
+    <section className="events" aria-labelledby="events-feed">
+      <h2 id="events-feed">Próximos eventos</h2>
+      <div className="events__grid" role="list">
+        {events.map((event) => (
+          <article key={event.id} className="event-card" role="listitem">
+            <header className="event-card__header">
+              <h3>{event.name}</h3>
+              <time dateTime={event.dateTime}>{event.date}</time>
+            </header>
+            <p className="event-card__location">{event.location}</p>
+            <p className="event-card__description">{event.description}</p>
+            <button type="button" className="event-card__cta">Reservar cupo</button>
           </article>
         ))}
       </div>
@@ -508,7 +562,7 @@ const HomePage = () => (
     <RecentVideos />
     <WrittenHighlights />
     <Newsletter />
-    <SocialFeed />
+    <EventsFeed />
   </>
 );
 
