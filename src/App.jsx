@@ -323,19 +323,21 @@ const Hero = () => {
         <span className="title-badge title-badge--compact">Noticia destacada</span>
       </div>
       <div className="hero__content">
-        <div className="hero__media" aria-label="Video destacado">
-          <div className="hero__video">
-            <iframe
-              src="https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1"
-              title="Video destacado"
-              frameBorder="0"
-              allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            ></iframe>
+        <div className="hero__primary">
+          <h2 id="hero-featured">Plan piloto de lechería inteligente reduce 18% la huella hídrica en Llanquihue</h2>
+          <div className="hero__media" aria-label="Video destacado">
+            <div className="hero__video">
+              <iframe
+                src="https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1"
+                title="Video destacado"
+                frameBorder="0"
+                allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
+            </div>
           </div>
         </div>
-        <div className="hero__text">
-          <h2 id="hero-featured">Plan piloto de lechería inteligente reduce 18% la huella hídrica en Llanquihue</h2>
+        <div className="hero__aside">
           <p>
             La cooperativa Láctea Austral lanzó un programa de monitoreo hídrico y alimentación inteligente que incorpora sensores IoT, análisis predictivo y biodigestores para transformar la gestión de agua en predios del sur de Chile.
           </p>
@@ -815,7 +817,7 @@ const Footer = () => {
         <span>&copy; {new Date().getFullYear()} marka_e. Todos los derechos reservados.</span>
         <span>
           Desarrollado por{' '}
-          <a href="https://www.agenciamarkae.cl" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.agenciamarka.cl" target="_blank" rel="noopener noreferrer">
             Agencia Marka
           </a>{' '}
           &amp;{' '}
