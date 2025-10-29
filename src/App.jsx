@@ -311,11 +311,26 @@ const Header = () => {
   );
 };
 
-const BannerSlot = ({ label }) => (
-  <section className="banner-slot" aria-label={label} role="complementary">
-    <span>{label}</span>
-  </section>
-);
+const BannerSlot = ({ label, imageSrc, alt }) => {
+  const mediaSrc = imageSrc ? encodeURI(imageSrc) : null;
+
+  return (
+    <section
+      className={`banner-slot${mediaSrc ? ' banner-slot--has-media' : ''}`}
+      aria-label={label}
+      role="complementary"
+    >
+      {mediaSrc ? (
+        <>
+          <img src={mediaSrc} alt={alt || label} className="banner-slot__image" />
+          <span className="sr-only">{label}</span>
+        </>
+      ) : (
+        <span>{label}</span>
+      )}
+    </section>
+  );
+};
 
 const Hero = () => {
   return (
@@ -845,7 +860,11 @@ const Layout = () => (
 
 const HomePage = () => (
   <>
-    <BannerSlot label="Espacio Banner 1" />
+    <BannerSlot
+      label="Espacio Banner 1"
+      imageSrc="/imagenes/banner-animacion-1.gif"
+      alt="Banner animado principal"
+    />
     <Hero />
     <BannerSlot label="Espacio Banner 2" />
     <RecentVideos />
