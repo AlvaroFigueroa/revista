@@ -769,20 +769,25 @@ main {
   }
 
   .hero__content {
-    grid-template-columns: minmax(0, 2.85fr) minmax(0, 2.15fr);
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 
   .hero__panel {
-    padding: 1.25rem;
-    border-radius: 12px;
+    padding: 1.2rem;
+    border-radius: 14px;
+  }
+
+  .hero__panel--feature {
+    padding-bottom: 1.5rem;
   }
 
   .hero__primary h2 {
-    font-size: 1.85rem;
+    font-size: clamp(1.5rem, 4vw, 1.8rem);
   }
 
   .hero__highlights {
-    gap: 0.65rem;
+    gap: 0.55rem;
   }
 }
 
