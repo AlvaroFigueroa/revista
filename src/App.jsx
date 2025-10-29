@@ -321,8 +321,8 @@ const Hero = () => {
   return (
     <section className="hero" aria-labelledby="hero-featured">
       <div className="hero__content">
-        <div className="hero__primary hero__panel">
-          <div className="hero__badges" aria-hidden="true">
+        <div className="hero__primary hero__panel hero__panel--feature">
+          <div className="hero__panel-header" aria-hidden="true">
             <span className="title-badge title-badge--compact">Noticia destacada</span>
           </div>
           <h2 id="hero-featured">Plan piloto de lechería inteligente reduce 18% la huella hídrica en Llanquihue</h2>
@@ -338,17 +338,20 @@ const Hero = () => {
             </div>
           </div>
         </div>
-        <div className="hero__aside hero__panel">
-          <div className="section-heading section-heading--compact" aria-hidden="true">
+        <div className="hero__aside hero__panel hero__panel--highlights">
+          <div className="hero__panel-header" aria-hidden="true">
             <span className="title-badge title-badge--compact">Otras noticias</span>
           </div>
+          <p className="hero__highlights-intro">
+            Seleccionamos titulares breves para complementar la cobertura diaria con iniciativas y programas que están
+            marcando la pauta empresarial en el sur de Chile.
+          </p>
           <ul className="hero__highlights" aria-label="Otras noticias relevantes">
             <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
             <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
             <li><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
             <li><span>•</span> Gremios lácteos impulsan feria tecnológica itinerante con demostraciones de maquinaria y software agrícola.</li>
             <li><span>•</span> Los Lagos prepara hub de innovación acuícola para acelerar startups con capital semilla regional.</li>
-            <li><span>•</span> Programa “Ruta Exportadora” suma 40 nuevas PyME’s con mentorías en logística internacional.</li>
           </ul>
         </div>
       </div>
