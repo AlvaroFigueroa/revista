@@ -129,6 +129,7 @@ const Header = () => {
       },
       { label: 'Economía y desarrollo', path: '/economia-desarrollo' },
       { label: "PyME's", path: '/pymes' },
+      { label: 'Nosotros', path: '/nosotros' },
       { label: 'Contacto', path: '/contacto' },
     ],
     []
@@ -319,11 +320,11 @@ const BannerSlot = ({ label }) => (
 const Hero = () => {
   return (
     <section className="hero" aria-labelledby="hero-featured">
-      <div className="section-heading section-heading--compact" aria-hidden="true">
-        <span className="title-badge title-badge--compact">Noticia destacada</span>
-      </div>
       <div className="hero__content">
-        <div className="hero__primary">
+        <div className="hero__primary hero__panel">
+          <div className="hero__badges" aria-hidden="true">
+            <span className="title-badge title-badge--compact">Noticia destacada</span>
+          </div>
           <h2 id="hero-featured">Plan piloto de lechería inteligente reduce 18% la huella hídrica en Llanquihue</h2>
           <div className="hero__media" aria-label="Video destacado">
             <div className="hero__video">
@@ -337,18 +338,17 @@ const Hero = () => {
             </div>
           </div>
         </div>
-        <div className="hero__aside">
-          <p>
-            La cooperativa Láctea Austral lanzó un programa de monitoreo hídrico y alimentación inteligente que incorpora sensores IoT, análisis predictivo y biodigestores para transformar la gestión de agua en predios del sur de Chile.
-          </p>
-          <hr />
-          <div className="hero__highlights-header section-heading section-heading--compact" aria-hidden="true">
+        <div className="hero__aside hero__panel">
+          <div className="section-heading section-heading--compact" aria-hidden="true">
             <span className="title-badge title-badge--compact">Otras noticias</span>
           </div>
-          <ul className="hero__highlights">
+          <ul className="hero__highlights" aria-label="Otras noticias relevantes">
             <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
             <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
             <li><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
+            <li><span>•</span> Gremios lácteos impulsan feria tecnológica itinerante con demostraciones de maquinaria y software agrícola.</li>
+            <li><span>•</span> Los Lagos prepara hub de innovación acuícola para acelerar startups con capital semilla regional.</li>
+            <li><span>•</span> Programa “Ruta Exportadora” suma 40 nuevas PyME’s con mentorías en logística internacional.</li>
           </ul>
         </div>
       </div>
@@ -1018,6 +1018,51 @@ const EconomiaPage = () => (
   </section>
 );
 
+const NosotrosPage = () => (
+  <section className="inner-page" aria-labelledby="nosotros-title">
+    <div className="inner-page__hero inner-page__hero--corporativo">
+      <h1 id="nosotros-title">Proyecto MARKA-E</h1>
+      <p>
+        MARKA-E es la plataforma digital creada por Agencia Marka para difundir el dinamismo empresarial y económico del sur
+        de Chile, con un enfoque informativo transparente y colaborativo.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>1. Qué es MARKA-E</h2>
+        <p>
+          MARKA-E es una nueva plataforma digital desarrollada por Agencia Marka en Puerto Montt, orientada a la difusión de
+          noticias empresariales y económicas. Su propósito es entregar información actual, objetiva y de calidad sobre el
+          quehacer productivo del país, con especial enfoque en la zona sur de Chile. A través de reportajes, entrevistas y
+          contenidos audiovisuales, MARKA-E busca mostrar el aporte de las empresas y organizaciones al desarrollo económico
+          y social del territorio.
+        </p>
+      </article>
+      <article>
+        <h2>2. Enfoque informativo y contenidos</h2>
+        <p>
+          El portal <a href="https://www.markae.cl" target="_blank" rel="noopener noreferrer">www.markae.cl</a> reúne
+          contenidos que abordan el mundo empresarial desde una mirada local y global, destacando experiencias,
+          innovaciones y desafíos de distintos sectores productivos. Las noticias estarán centradas en áreas clave como la
+          acuicultura, la lechería, el turismo y las pequeñas y medianas empresas (Pymes), relevando su rol en la generación
+          de empleo, inversión y crecimiento regional. MARKA-E pone en valor el trabajo de quienes impulsan la economía del
+          sur y contribuyen al posicionamiento de Chile como referente en diversas industrias.
+        </p>
+      </article>
+      <article>
+        <h2>3. Una vitrina para la economía del sur de Chile</h2>
+        <p>
+          MARKA-E nace como una plataforma de difusión abierta y colaborativa, que busca conectar al sector empresarial con
+          la comunidad y los medios. Su objetivo es visibilizar las contribuciones y buenas prácticas de las empresas en
+          cada rubro, promoviendo un relato positivo y constructivo sobre el desarrollo regional. Con una línea editorial
+          informativa y transparente, MARKA-E se proyecta como un punto de encuentro entre la empresa, la innovación y el
+          territorio.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
 const ContactoPage = () => (
   <section className="inner-page" aria-labelledby="contacto-title">
     <div className="inner-page__hero inner-page__hero--contacto">
@@ -1069,6 +1114,7 @@ function App() {
         <Route path="turismo/operadores" element={<TurismoOperadoresPage />} />
         <Route path="turismo/hoteleria-gastronomia" element={<TurismoHoteleriaPage />} />
         <Route path="turismo/oferta" element={<TurismoOfertaPage />} />
+        <Route path="nosotros" element={<NosotrosPage />} />
         <Route path="pymes" element={<PymesPage />} />
         <Route path="economia-desarrollo" element={<EconomiaPage />} />
         <Route path="contacto" element={<ContactoPage />} />
