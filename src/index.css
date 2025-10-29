@@ -1159,7 +1159,7 @@ main {
 
 .newsletter__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr);
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   gap: 2rem;
   align-items: stretch;
 }
@@ -1377,6 +1377,44 @@ main {
 
   .newsletter__banner {
     min-height: 160px;
+    order: -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .newsletter {
+    padding: 1.5rem 1.25rem 2rem;
+  }
+
+  .newsletter__layout {
+    gap: 1.5rem;
+  }
+
+  .newsletter__form {
+    grid-template-columns: 1fr;
+  }
+
+  .newsletter__group input {
+    border-radius: 12px;
+  }
+
+  .newsletter__submit {
+    width: 100%;
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .newsletter__layout {
+    gap: 1.25rem;
+  }
+
+  .newsletter__intro {
+    font-size: 0.95rem;
+  }
+
+  .newsletter__banner {
+    min-height: 140px;
   }
 }
 
