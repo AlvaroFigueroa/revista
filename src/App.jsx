@@ -198,6 +198,42 @@ const Header = () => {
           <FinancialTicker />
         </div>
 
+        <div className="header__social" aria-label="Redes sociales">
+          <a
+            className="header__social-link header__social-link--instagram"
+            href="https://www.instagram.com/marka_e"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="sr-only">Instagram</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3.75A4.25 4.25 0 1 1 7.75 12 4.25 4.25 0 0 1 12 7.75zm0 2a2.25 2.25 0 1 0 2.25 2.25A2.25 2.25 0 0 0 12 9.75zm5.5-3a1 1 0 1 1-1 1 1 1 0 0 1 1-1z" />
+            </svg>
+          </a>
+          <a
+            className="header__social-link header__social-link--facebook"
+            href="https://www.facebook.com/markae"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="sr-only">Facebook</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M22 12a10 10 0 1 0-11.5 9.87v-6.98H8.5V12h2v-1.7c0-2 1.2-3.1 3-3.1a12.4 12.4 0 0 1 1.8.16v2h-1c-1 0-1.3.62-1.3 1.25V12h2.24l-.36 2.89h-1.88v6.98A10 10 0 0 0 22 12z" />
+            </svg>
+          </a>
+          <a
+            className="header__social-link header__social-link--x"
+            href="https://twitter.com/marka_e"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="sr-only">X (antes Twitter)</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 3.5h3.2l5.2 6.6 4.8-6.6H20l-6.2 8.3L20 20.5h-3.2l-5.4-7-5 7H4l6.3-8.7z" />
+            </svg>
+          </a>
+        </div>
+
         <div className="header__actions" aria-label="Acciones del usuario">
           {user ? (
             <>
@@ -283,9 +319,9 @@ const BannerSlot = ({ label }) => (
 const Hero = () => {
   return (
     <section className="hero" aria-labelledby="hero-featured">
-      <p className="section-label" aria-hidden>
-        Noticia destacada
-      </p>
+      <div className="section-heading section-heading--compact" aria-hidden="true">
+        <span className="title-badge title-badge--compact">Noticia destacada</span>
+      </div>
       <div className="hero__content">
         <div className="hero__media" aria-label="Video destacado">
           <div className="hero__video">
@@ -304,8 +340,8 @@ const Hero = () => {
             La cooperativa Láctea Austral lanzó un programa de monitoreo hídrico y alimentación inteligente que incorpora sensores IoT, análisis predictivo y biodigestores para transformar la gestión de agua en predios del sur de Chile.
           </p>
           <hr />
-          <div className="hero__highlights-header">
-            <span className="hero__highlights-label">Otras noticias</span>
+          <div className="hero__highlights-header section-heading section-heading--compact" aria-hidden="true">
+            <span className="title-badge title-badge--compact">Otras noticias</span>
           </div>
           <ul className="hero__highlights">
             <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
@@ -332,8 +368,10 @@ const RecentVideos = () => {
 
   return (
     <section className="videos" aria-labelledby="recent-videos">
-      <div className="videos__header">
-        <h2 id="recent-videos">Videos recientes</h2>
+      <div className="videos__header section-heading">
+        <h2 id="recent-videos">
+          <span className="title-badge">Videos recientes</span>
+        </h2>
       </div>
       <div className="videos__grid">
         {videos.map((video) => (
@@ -431,8 +469,10 @@ const WrittenHighlights = () => {
 
   return (
     <section className="written" aria-labelledby="written-highlights">
-      <div className="written__header">
-        <h2 id="written-highlights">Otras noticias y comunicados de prensa</h2>
+      <div className="written__header section-heading">
+        <h2 id="written-highlights">
+          <span className="title-badge">Otras noticias y comunicados de prensa</span>
+        </h2>
       </div>
       <div className="written__grid">
         {articles.map((article) => (
@@ -495,7 +535,11 @@ const Newsletter = () => {
     <section className="newsletter" aria-labelledby="newsletter">
       <div className="newsletter__layout">
         <div className="newsletter__content">
-          <h2 id="newsletter">Newsletter / Suscripción gratis</h2>
+          <div className="section-heading">
+            <h2 id="newsletter">
+              <span className="title-badge">Newsletter / Suscripción gratis</span>
+            </h2>
+          </div>
           <p className="newsletter__intro">
             Recibe un resumen mensual con entrevistas, reportajes y agenda de eventos del ecosistema empresarial del sur de Chile.
           </p>
@@ -546,6 +590,131 @@ const Newsletter = () => {
   );
 };
 
+const ContactForm = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', company: '', message: '' });
+  const [status, setStatus] = useState('idle');
+  const [feedback, setFeedback] = useState('');
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setStatus('loading');
+    setFeedback('');
+
+    try {
+      const response = await fetch('/contacto.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData).toString(),
+      });
+
+      const contentType = response.headers.get('content-type') ?? '';
+
+      if (contentType.includes('application/json')) {
+        const result = await response.json();
+
+        if (!response.ok || !result.status) {
+          throw new Error(result.message || 'No pudimos enviar tu mensaje.');
+        }
+
+        setStatus('success');
+        setFeedback(result.message || '¡Gracias! Tu mensaje fue enviado correctamente.');
+        setFormData({ name: '', email: '', company: '', message: '' });
+        return;
+      }
+
+      const text = await response.text();
+      const trimmed = text.trim();
+
+      if (!response.ok) {
+        throw new Error(trimmed.slice(0, 140) || 'El servidor respondió con un error desconocido.');
+      }
+
+      if (trimmed.startsWith('<?php')) {
+        throw new Error(
+          'El servidor devolvió código PHP sin ejecutar. Ejecuta la aplicación en un servidor con soporte PHP para procesar contacto.php.'
+        );
+      }
+
+      if (trimmed.startsWith('<')) {
+        throw new Error('El servidor devolvió HTML inesperado. Revisa la configuración del backend.');
+      }
+
+      setStatus('success');
+      setFeedback(trimmed || '¡Gracias! Tu mensaje fue enviado correctamente.');
+      setFormData({ name: '', email: '', company: '', message: '' });
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+      setFeedback(error.message || 'No pudimos enviar tu mensaje. Intenta nuevamente más tarde.');
+    }
+  };
+
+  return (
+    <form className={`contact-form contact-form--${status}`} onSubmit={handleSubmit}>
+      <div className="contact-form__group">
+        <label htmlFor="contact-name">Nombre completo</label>
+        <input
+          id="contact-name"
+          name="name"
+          type="text"
+          placeholder="Tu nombre"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className="contact-form__group">
+        <label htmlFor="contact-email">Correo electrónico</label>
+        <input
+          id="contact-email"
+          name="email"
+          type="email"
+          placeholder="tu@correo.com"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className="contact-form__group">
+        <label htmlFor="contact-company">Empresa / organización</label>
+        <input
+          id="contact-company"
+          name="company"
+          type="text"
+          placeholder="Nombre de tu empresa"
+          value={formData.company}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="contact-form__group">
+        <label htmlFor="contact-message">Mensaje</label>
+        <textarea
+          id="contact-message"
+          name="message"
+          rows="5"
+          placeholder="Cuéntanos en qué podemos ayudarte"
+          value={formData.message}
+          onChange={handleChange}
+          required
+        ></textarea>
+      </div>
+      <button type="submit" className="contact-form__submit" disabled={status === 'loading'}>
+        {status === 'loading' ? 'Enviando…' : 'Enviar mensaje'}
+      </button>
+      {status !== 'idle' && feedback ? (
+        <p className={`contact-form__feedback contact-form__feedback--${status === 'success' ? 'success' : 'error'}`}>
+          {feedback}
+        </p>
+      ) : null}
+    </form>
+  );
+};
+
 const EventsFeed = () => {
   const events = [
     {
@@ -576,7 +745,11 @@ const EventsFeed = () => {
 
   return (
     <section className="events" aria-labelledby="events-feed">
-      <h2 id="events-feed">Próximos eventos</h2>
+      <div className="section-heading">
+        <h2 id="events-feed">
+          <span className="title-badge">Próximos eventos</span>
+        </h2>
+      </div>
       <div className="events__grid" role="list">
         {events.map((event) => (
           <article key={event.id} className="event-card" role="listitem">
@@ -599,9 +772,9 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer__grid">
         <div className="footer__brand">
-          <img src="/imagenes/logo.png" alt="marka_e medio digital" className="footer__logo" />
+          <img src="/imagenes/markae%20blanco.png" alt="marka_e medio digital" className="footer__logo" />
           <p>
-            Plataforma de noticias y análisis sobre acuicultura, lechería, agricultura y turismo en América Latina.
+            Plataforma de noticias y análisis sobre acuicultura, lechería, agricultura y turismo en la zona sur de Chile.
           </p>
         </div>
 
@@ -639,7 +812,7 @@ const Footer = () => {
       </div>
 
       <div className="footer__bottom">
-        <span>© {new Date().getFullYear()} marka_e. Todos los derechos reservados.</span>
+        <span>&copy; {new Date().getFullYear()} marka_e. Todos los derechos reservados.</span>
         <span>
           Desarrollado por{' '}
           <a href="https://www.agenciamarkae.cl" target="_blank" rel="noopener noreferrer">
@@ -854,7 +1027,11 @@ const ContactoPage = () => (
     </div>
     <div className="inner-page__content inner-page__content--split">
       <article className="contact-card">
-        <h2>Información de contacto</h2>
+        <div className="section-heading">
+          <h2>
+            <span className="title-badge">Información de contacto</span>
+          </h2>
+        </div>
         <ul className="contact-details" aria-label="Datos de contacto de MARKA E">
           <li>
             <span className="contact-details__label">Correo</span>
@@ -868,34 +1045,12 @@ const ContactoPage = () => (
       </article>
 
       <article className="contact-form-card">
-        <h2>Escríbenos</h2>
-        <form className="contact-form" action="/contacto.php" method="POST">
-          <div className="contact-form__group">
-            <label htmlFor="contact-name">Nombre completo</label>
-            <input id="contact-name" name="name" type="text" placeholder="Tu nombre" required />
-          </div>
-          <div className="contact-form__group">
-            <label htmlFor="contact-email">Correo electrónico</label>
-            <input id="contact-email" name="email" type="email" placeholder="tu@correo.com" required />
-          </div>
-          <div className="contact-form__group">
-            <label htmlFor="contact-company">Empresa / organización</label>
-            <input id="contact-company" name="company" type="text" placeholder="Nombre de tu empresa" />
-          </div>
-          <div className="contact-form__group">
-            <label htmlFor="contact-message">Mensaje</label>
-            <textarea
-              id="contact-message"
-              name="message"
-              rows="5"
-              placeholder="Cuéntanos en qué podemos ayudarte"
-              required
-            ></textarea>
-          </div>
-          <button type="submit" className="contact-form__submit">
-            Enviar mensaje
-          </button>
-        </form>
+        <div className="section-heading">
+          <h2>
+            <span className="title-badge">Escríbenos</span>
+          </h2>
+        </div>
+        <ContactForm />
       </article>
     </div>
   </section>

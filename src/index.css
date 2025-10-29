@@ -124,6 +124,31 @@ body {
   box-shadow: 0 14px 32px -18px rgba(37, 99, 235, 0.55);
 }
 
+.contact-form__submit:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.contact-form__feedback {
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin: 0;
+}
+
+.contact-form__feedback--success {
+  background-color: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.contact-form__feedback--error {
+  background-color: rgba(248, 113, 113, 0.12);
+  color: #b91c1c;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+}
+
 @media (max-width: 768px) {
   .app-shell {
     box-shadow: none;
@@ -190,6 +215,52 @@ body {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
+.header__social {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(226, 232, 240, 0.4), rgba(219, 234, 254, 0.45));
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.header__social-link {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #1f2937;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.header__social-link svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.header__social-link--instagram {
+  color: #ec4899;
+}
+
+.header__social-link--facebook {
+  color: #2563eb;
+}
+
+.header__social-link--x {
+  color: #111827;
+}
+
+.header__social-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -18px rgba(15, 23, 42, 0.6);
+  background: #f8fafc;
+}
+
 .financial-ticker {
   display: inline-flex;
   align-items: center;
@@ -222,6 +293,10 @@ body {
 @media (max-width: 1024px) {
   .header__ticker {
     display: none;
+  }
+
+  .header__social {
+    margin-left: auto;
   }
 }
 
@@ -539,28 +614,39 @@ main {
   border-top: 1px solid #e5e7eb;
 }
 
-.hero__highlights-header {
+
+.section-heading {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.section-heading--compact {
   margin-bottom: 0.75rem;
 }
 
-.hero__highlights-label {
+.section-heading h2 {
+  margin: 0;
+}
+
+.title-badge {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.4rem 0.85rem;
+  padding: 0.45rem 1.4rem;
   border-radius: 999px;
   background: linear-gradient(135deg, #1d4ed8, #2563eb);
   color: #ffffff;
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  box-shadow: 0 12px 30px -20px rgba(37, 99, 235, 0.7);
 }
 
-.hero__highlights-label::after {
+.title-badge::after {
   content: '';
   width: 0;
   height: 0;
@@ -571,6 +657,15 @@ main {
   bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.title-badge--compact {
+  font-size: 0.78rem;
+  padding: 0.4rem 1rem;
+}
+
+.section-heading .title-badge {
+  margin-top: 0.25rem;
 }
 
 .hero__highlights {
@@ -1417,10 +1512,10 @@ main {
 }
 
 .footer {
-  background-color: #0f172a;
+  background-color: #3b61a5;
   color: #f8fafc;
   padding: 2.5rem 2rem 2rem;
-  border-top: 1px solid #1f2937;
+  border-top: 1px solid rgba(15, 23, 42, 0.25);
 }
 
 .footer__grid {
@@ -1437,11 +1532,10 @@ main {
 }
 
 .footer__logo {
-  width: 200px;
+  width: 210px;
   max-width: 100%;
   margin-bottom: 1rem;
   display: block;
-  filter: drop-shadow(0 10px 20px rgba(15, 23, 42, 0.35));
 }
 
 .footer__section h4 {
@@ -1449,7 +1543,7 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 600;
-  color: #94a3b8;
+  color: rgba(226, 232, 240, 0.85);
   margin-bottom: 0.75rem;
 }
 
@@ -1462,33 +1556,34 @@ main {
 
 .footer__section a {
   text-decoration: none;
-  color: #e2e8f0;
+  color: #f8fafc;
   font-size: 0.95rem;
 }
 
 .footer__section a:hover {
-  color: #bfdbfe;
+  color: #dbeafe;
 }
 
 .footer__bottom {
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid rgba(15, 23, 42, 0.18);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: rgba(226, 232, 240, 0.85);
 }
 
 .footer__bottom a {
-  color: #bfdbfe;
+  color: #fef9c3;
   text-decoration: none;
   font-weight: 600;
 }
 
 .footer__bottom a:hover {
   text-decoration: underline;
+  color: #fde68a;
 }
 
 @media (max-width: 768px) {
