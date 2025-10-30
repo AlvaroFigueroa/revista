@@ -810,6 +810,20 @@ main {
   }
 }
 
+@media (max-width: 640px) {
+  .hero__highlights-intro {
+    display: none;
+  }
+
+  .hero__highlights li[data-mobile-hidden] {
+    display: none;
+  }
+
+  .hero__highlights {
+    grid-template-columns: 1fr;
+  }
+}
+
 .videos {
   padding: 2rem 2rem 2.5rem;
   background-color: #ffffff;

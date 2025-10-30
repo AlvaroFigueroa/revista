@@ -370,12 +370,16 @@ const Hero = () => {
             Seleccionamos titulares breves para complementar la cobertura diaria con iniciativas y programas que están
             marcando la pauta empresarial en el sur de Chile.
           </p>
-          <ul className="hero__highlights" aria-label="Otras noticias relevantes">
+          <ul
+            className="hero__highlights"
+            aria-label="Otras noticias relevantes"
+            data-mobile-visible-count="2"
+          >
             <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
             <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
-            <li><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
-            <li><span>•</span> Gremios lácteos impulsan feria tecnológica itinerante con demostraciones de maquinaria y software agrícola.</li>
-            <li><span>•</span> Los Lagos prepara hub de innovación acuícola para acelerar startups con capital semilla regional.</li>
+            <li data-mobile-hidden><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
+            <li data-mobile-hidden><span>•</span> Gremios lácteos impulsan feria tecnológica itinerante con demostraciones de maquinaria y software agrícola.</li>
+            <li data-mobile-hidden><span>•</span> Los Lagos prepara hub de innovación acuícola para acelerar startups con capital semilla regional.</li>
           </ul>
         </div>
       </div>
@@ -876,7 +880,11 @@ const HomePage = () => (
       alt="Banner animado principal"
     />
     <Hero />
-    <BannerSlot label="Espacio Banner 2" />
+    <BannerSlot
+      label="Espacio Banner 2"
+      imageSrc="/imagenes/banner-aqualider.gif"
+      alt="Banner Aqualider"
+    />
     <RecentVideos />
     <WrittenHighlights />
     <Newsletter />
