@@ -460,6 +460,14 @@ const RecentVideos = () => {
 const WrittenHighlights = () => {
   const articles = [
     {
+      id: 'economia-id',
+      title: 'Puerto Varas se consolida como polo biotecnológico del sur con nuevo StartupLab Los Lagos',
+      excerpt:
+        'Corfo aprobó el proyecto StartupLab Los Lagos, liderado por Patagonia Biotech HUB, que posicionará a Puerto Varas como referente biotecnológico con laboratorios especializados y redes regionales.',
+      image: '/imagenes/economia/startup-lab-01.jpg',
+      path: '/economia-desarrollo/id',
+    },
+    {
       id: 1,
       title: '¿Puede el entrenamiento con ejercicios de fuerza ser un aliado en el tratamiento del cáncer de mama?',
       excerpt:
@@ -547,7 +555,13 @@ const WrittenHighlights = () => {
             <div className="written-card__content">
               <h3>{article.title}</h3>
               <p>{article.excerpt}</p>
-              <a href="#" className="written-card__cta">Leer más</a>
+              {article.path ? (
+                <Link to={article.path} className="written-card__cta" aria-label={`Leer más sobre ${article.title}`}>
+                  Leer más
+                </Link>
+              ) : (
+                <a href="#" className="written-card__cta">Leer más</a>
+              )}
             </div>
           </article>
         ))}
@@ -1109,7 +1123,7 @@ const EconomiaIDPage = () => (
           <ul className="news-feature__meta">
             <li>Sección: Economía y desarrollo / I+D</li>
             <li>Fecha: 30 de octubre de 2025</li>
-            <li>Fuente: Patagonia Biotech HUB</li>
+            <li>Fuente: Depto. de Comunicaciones de Corfo Los Lagos</li>
           </ul>
         </header>
 
@@ -1164,6 +1178,12 @@ const EconomiaIDPage = () => (
         </aside>
       </div>
     </article>
+
+    <div className="news-feature__actions">
+      <Link to="/" className="news-feature__back">
+        Volver al inicio
+      </Link>
+    </div>
   </section>
 );
 
