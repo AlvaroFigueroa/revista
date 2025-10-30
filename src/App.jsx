@@ -127,7 +127,15 @@ const Header = () => {
           { label: 'Oferta turística', path: '/turismo/oferta' },
         ],
       },
-      { label: 'Economía y desarrollo', path: '/economia-desarrollo' },
+      {
+        label: 'Economía y desarrollo',
+        key: 'economia',
+        submenu: [
+          { label: 'I+D', path: '/economia-desarrollo/id' },
+          { label: 'Tecnología', path: '/economia-desarrollo/tecnologia' },
+          { label: 'Servicios', path: '/economia-desarrollo/servicios' },
+        ],
+      },
       { label: "PyME's", path: '/pymes' },
       { label: 'Nosotros', path: '/nosotros' },
       { label: 'Contacto', path: '/contacto' },
@@ -388,7 +396,17 @@ const Hero = () => {
             aria-label="Otras noticias relevantes"
             data-mobile-visible-count="2"
           >
-            <li><span>•</span> Sensores instalados en 26 lecherías entregan alertas en tiempo real sobre consumo y calidad de agua.</li>
+            <li>
+              <span>•</span>
+              <div className="hero__highlight-content">
+                <Link to="/economia-desarrollo/id" className="hero__highlight-title">
+                  Puerto Varas se consolida como polo biotecnológico del sur con nuevo StartupLab Los Lagos
+                </Link>
+                <Link to="/economia-desarrollo/id" className="hero__highlight-cta" aria-label="Leer más sobre Puerto Varas se consolida como polo biotecnológico">
+                  Leer más →
+                </Link>
+              </div>
+            </li>
             <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
             <li data-mobile-hidden><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
             <li data-mobile-hidden><span>•</span> Gremios lácteos impulsan feria tecnológica itinerante con demostraciones de maquinaria y software agrícola.</li>
@@ -1074,6 +1092,122 @@ const EconomiaPage = () => (
   </section>
 );
 
+const EconomiaIDPage = () => (
+  <section className="inner-page" aria-labelledby="economia-id-title">
+    <h1 id="economia-id-title" className="sr-only">
+      I+D destacado
+    </h1>
+
+    <article className="news-feature news-feature--id" aria-label="StartupLab Los Lagos">
+      <div className="news-feature__grid">
+        <figure className="news-feature__photo">
+          <img src="/imagenes/economia/startup-lab-01.jpg" alt="Equipo de StartupLab Los Lagos en Puerto Varas" />
+        </figure>
+
+        <header className="news-feature__headline">
+          <h2>Puerto Varas se consolida como polo biotecnológico del sur con nuevo StartupLab Los Lagos</h2>
+          <ul className="news-feature__meta">
+            <li>Sección: Economía y desarrollo / I+D</li>
+            <li>Fecha: 30 de octubre de 2025</li>
+            <li>Fuente: Patagonia Biotech HUB</li>
+          </ul>
+        </header>
+
+        <div className="news-feature__content">
+          <p className="news-feature__lead">
+            Corfo aprobó el proyecto StartupLab Los Lagos, liderado por Patagonia Biotech HUB y con base en Puerto Varas, que
+            busca posicionar a la región como referente nacional en biotecnología aplicada y desarrollo sostenible. La iniciativa
+            contempla una inversión de US$ 4,3 millones y reúne a empresas, instituciones públicas y actores del ecosistema
+            científico-tecnológico.
+          </p>
+          <p>
+            En el marco de su estrategia de descentralización de la innovación, Corfo aprobó el proyecto StartupLab Los Lagos,
+            que será implementado por Patagonia Biotech HUB, encabezado por KuraBiotech. El nuevo centro tendrá su sede en
+            Puerto Varas, donde se construirá un espacio de 1.000 m², con laboratorios especializados y áreas colaborativas
+            orientadas al desarrollo biotecnológico.
+          </p>
+          <p>
+            El StartupLab impulsará la innovación en sectores como acuicultura, agroindustria, silvicultura, energías limpias y
+            biomedicina animal, con alcance en red hacia las regiones de La Araucanía, Los Ríos, Aysén y Magallanes.
+          </p>
+          <p>
+            El proyecto cuenta con un presupuesto total de US$ 4,3 millones, de los cuales US$ 2,5 millones provienen de Corfo y
+            US$ 1,8 millones del sector privado, con la participación de KuraBiotech, Veterquímica, Multi X, Genera4,
+            Acuanativa, y el apoyo de instituciones como la Municipalidad de Puerto Varas, Sofofa Hub, Endeavor y BancoEstado.
+          </p>
+          <p>
+            El seremi de Economía de Los Lagos, Luis Cárdenas, calificó la iniciativa como “un día histórico para la región”,
+            destacando su aporte a la diversificación productiva y la economía del conocimiento. En tanto, el director regional
+            de Corfo, Eduardo Arancibia, señaló que el StartupLab “posiciona a Los Lagos como un polo de biotecnología aplicada
+            al desarrollo sostenible, con una mirada hacia el mundo”.
+          </p>
+          <p>
+            El alcalde de Puerto Varas, Tomás Gárate, resaltó que el proyecto “consolidará a la ciudad como un referente en
+            investigación aplicada e innovación con impacto territorial”, mientras que el CEO de KuraBiotech, Eduardo Wallach,
+            subrayó que “Puerto Varas ya no es una promesa, sino un epicentro real del emprendimiento y la biotecnología en
+            Chile”.
+          </p>
+          <p>
+            Con esta aprobación, Corfo fortalece su red nacional de hubs de innovación, promoviendo el desarrollo tecnológico
+            desde las regiones hacia todo el país.
+          </p>
+        </div>
+
+        <aside className="news-feature__aside" aria-label="Otras noticias de I+D">
+          <h3>Otras noticias</h3>
+          <ul>
+            <li>Startups acuícolas de Los Lagos aceleran transferencia tecnológica con apoyo de Endeavor.</li>
+            <li>Universidad Austral inaugura centro de prototipado para bioeconomía circular.</li>
+            <li>Hub de innovación energética lanza convocatoria para proyectos de hidrógeno verde.</li>
+            <li>Laboratorio regional desarrolla biosensores para monitoreo de ecosistemas lacustres.</li>
+          </ul>
+        </aside>
+      </div>
+    </article>
+  </section>
+);
+
+const EconomiaTecnologiaPage = () => (
+  <section className="inner-page" aria-labelledby="economia-tecnologia-title">
+    <div className="inner-page__hero inner-page__hero--negocios">
+      <h1 id="economia-tecnologia-title">Tecnología</h1>
+      <p>
+        Transformación digital, automatización y soluciones inteligentes que modernizan la gestión empresarial en el sur del
+        país.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Reportes en preparación</h2>
+        <p>
+          Pronto publicaremos notas sobre software, hardware y servicios tecnológicos adoptados por empresas regionales para
+          mejorar su productividad.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
+const EconomiaServiciosPage = () => (
+  <section className="inner-page" aria-labelledby="economia-servicios-title">
+    <div className="inner-page__hero inner-page__hero--negocios">
+      <h1 id="economia-servicios-title">Servicios</h1>
+      <p>
+        Plataformas y proveedores especializados que acompañan el crecimiento de las pymes y grandes empresas del sur.
+      </p>
+    </div>
+    <div className="inner-page__content">
+      <article>
+        <h2>Sección en construcción</h2>
+        <p>
+          En breve incluiremos guías y directorios de servicios financieros, logísticos, profesionales y de consultoría para
+          apoyar la gestión empresarial.
+        </p>
+      </article>
+    </div>
+  </section>
+);
+
 const NosotrosPage = () => (
   <section className="inner-page" aria-labelledby="nosotros-title">
     <div className="inner-page__hero inner-page__hero--corporativo">
@@ -1173,6 +1307,9 @@ function App() {
         <Route path="nosotros" element={<NosotrosPage />} />
         <Route path="pymes" element={<PymesPage />} />
         <Route path="economia-desarrollo" element={<EconomiaPage />} />
+        <Route path="economia-desarrollo/id" element={<EconomiaIDPage />} />
+        <Route path="economia-desarrollo/tecnologia" element={<EconomiaTecnologiaPage />} />
+        <Route path="economia-desarrollo/servicios" element={<EconomiaServiciosPage />} />
         <Route path="contacto" element={<ContactoPage />} />
         <Route path="auth" element={<AuthPage />} />
       </Route>
