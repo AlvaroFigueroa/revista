@@ -530,13 +530,6 @@ const WrittenHighlights = () => {
         'La iniciativa reúne a empresas TI, liceos técnicos y universidades para acelerar carreras en programación, data analytics y ciberseguridad con prácticas pagadas.',
       image: '/imagenes/premiacion1.png',
     },
-    {
-      id: 10,
-      title: 'Exportadores frutícolas estrenan plataforma blockchain para trazabilidad en destino',
-      excerpt:
-        'La Asociación de Productores del sur implementó un sistema de bloques que certifica calidad y cadena de frío en contenedores con destino a Estados Unidos y Europa.',
-      image: '/imagenes/Gissela Castillo (5) (1).png',
-    },
   ];
 
   return (
@@ -1106,7 +1099,12 @@ const EconomiaPage = () => (
   </section>
 );
 
-const EconomiaIDPage = () => (
+const EconomiaIDPage = () => {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
+  return (
   <section className="inner-page" aria-labelledby="economia-id-title">
     <h1 id="economia-id-title" className="sr-only">
       I+D destacado
@@ -1185,7 +1183,8 @@ const EconomiaIDPage = () => (
       </Link>
     </div>
   </section>
-);
+  );
+};
 
 const EconomiaTecnologiaPage = () => (
   <section className="inner-page" aria-labelledby="economia-tecnologia-title">
