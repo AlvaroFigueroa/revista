@@ -311,10 +311,26 @@ const Header = () => {
   );
 };
 
-const BannerSlot = ({ label, imageSrc, mobileImageSrc, alt }) => {
+const BannerSlot = ({ label, imageSrc, mobileImageSrc, alt, href }) => {
   const desktopSrc = imageSrc ? encodeURI(imageSrc) : null;
   const mobileSrc = mobileImageSrc ? encodeURI(mobileImageSrc) : null;
   const hasMedia = desktopSrc || mobileSrc;
+
+  const content = hasMedia ? (
+    <picture className="banner-slot__picture">
+      {mobileSrc && <source srcSet={mobileSrc} media="(max-width: 640px)" />}
+      {desktopSrc && <source srcSet={desktopSrc} media="(min-width: 641px)" />}
+      <img
+        src={desktopSrc || mobileSrc}
+        alt={alt || label}
+        className="banner-slot__image"
+        loading="lazy"
+      />
+      <span className="sr-only">{label}</span>
+    </picture>
+  ) : (
+    <span>{label}</span>
+  );
 
   return (
     <section
@@ -322,20 +338,17 @@ const BannerSlot = ({ label, imageSrc, mobileImageSrc, alt }) => {
       aria-label={label}
       role="complementary"
     >
-      {hasMedia ? (
-        <picture className="banner-slot__picture">
-          {mobileSrc && <source srcSet={mobileSrc} media="(max-width: 640px)" />}
-          {desktopSrc && <source srcSet={desktopSrc} media="(min-width: 641px)" />}
-          <img
-            src={desktopSrc || mobileSrc}
-            alt={alt || label}
-            className="banner-slot__image"
-            loading="lazy"
-          />
-          <span className="sr-only">{label}</span>
-        </picture>
+      {href ? (
+        <a
+          className="banner-slot__link"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {content}
+        </a>
       ) : (
-        <span>{label}</span>
+        content
       )}
     </section>
   );
@@ -878,12 +891,15 @@ const HomePage = () => (
       imageSrc="/imagenes/banner-animacion-1.gif"
       mobileImageSrc="/imagenes/Codeclan_Responsive.gif"
       alt="Banner animado principal"
+      href="https://www.codecland.com"
     />
     <Hero />
     <BannerSlot
       label="Espacio Banner 2"
       imageSrc="/imagenes/banner-aqualider.gif"
+      mobileImageSrc="/imagenes/Aqualider_responsive.gif"
       alt="Banner Aqualider"
+      href="https://www.aqualider.cl"
     />
     <RecentVideos />
     <WrittenHighlights />
