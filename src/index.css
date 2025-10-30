@@ -408,11 +408,16 @@ body {
   padding: 0;
 }
 
+.banner-slot__picture,
 .banner-slot__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.banner-slot__picture {
+  height: 100%;
 }
 
 .header__nav a:hover {

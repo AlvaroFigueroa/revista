@@ -311,20 +311,29 @@ const Header = () => {
   );
 };
 
-const BannerSlot = ({ label, imageSrc, alt }) => {
-  const mediaSrc = imageSrc ? encodeURI(imageSrc) : null;
+const BannerSlot = ({ label, imageSrc, mobileImageSrc, alt }) => {
+  const desktopSrc = imageSrc ? encodeURI(imageSrc) : null;
+  const mobileSrc = mobileImageSrc ? encodeURI(mobileImageSrc) : null;
+  const hasMedia = desktopSrc || mobileSrc;
 
   return (
     <section
-      className={`banner-slot${mediaSrc ? ' banner-slot--has-media' : ''}`}
+      className={`banner-slot${hasMedia ? ' banner-slot--has-media' : ''}`}
       aria-label={label}
       role="complementary"
     >
-      {mediaSrc ? (
-        <>
-          <img src={mediaSrc} alt={alt || label} className="banner-slot__image" />
+      {hasMedia ? (
+        <picture className="banner-slot__picture">
+          {mobileSrc && <source srcSet={mobileSrc} media="(max-width: 640px)" />}
+          {desktopSrc && <source srcSet={desktopSrc} media="(min-width: 641px)" />}
+          <img
+            src={desktopSrc || mobileSrc}
+            alt={alt || label}
+            className="banner-slot__image"
+            loading="lazy"
+          />
           <span className="sr-only">{label}</span>
-        </>
+        </picture>
       ) : (
         <span>{label}</span>
       )}
@@ -863,6 +872,7 @@ const HomePage = () => (
     <BannerSlot
       label="Espacio Banner 1"
       imageSrc="/imagenes/banner-animacion-1.gif"
+      mobileImageSrc="/imagenes/Codeclan_Responsive.gif"
       alt="Banner animado principal"
     />
     <Hero />
