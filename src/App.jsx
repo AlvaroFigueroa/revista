@@ -626,13 +626,6 @@ const WrittenHighlights = () => {
         'Sercotec y ProChile acompañaron a microempresas turísticas y gastronómicas para abrir mercados internacionales mediante vitrinas digitales y asesoría logística.',
       image: '/imagenes/Gissela Castillo (5) (1).png',
     },
-    {
-      id: 9,
-      title: 'Puerto Montt habilita centro de formación dual para talento tecnológico regional',
-      excerpt:
-        'La iniciativa reúne a empresas TI, liceos técnicos y universidades para acelerar carreras en programación, data analytics y ciberseguridad con prácticas pagadas.',
-      image: '/imagenes/premiacion1.png',
-    },
   ];
 
   return (
@@ -643,7 +636,7 @@ const WrittenHighlights = () => {
         </h2>
       </div>
       <div className="written__grid">
-        {articles.map((article) => (
+        {articles.slice(0, 10).map((article) => (
           <article key={article.id} className="written-card">
             <div className="written-card__image">
               <img src={article.image} alt={article.title} />
