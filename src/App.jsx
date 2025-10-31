@@ -98,6 +98,84 @@ const FinancialTicker = () => {
   );
 };
 
+const MarkaELaunchPage = () => {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
+  return (
+    <section className="inner-page" aria-labelledby="markae-launch-title">
+      <h1 id="markae-launch-title" className="sr-only">
+        Lanzamiento Marka-E
+      </h1>
+
+      <article className="news-feature news-feature--id" aria-label="Lanzamiento de la plataforma Marka-E">
+        <div className="news-feature__grid">
+          <figure className="news-feature__photo">
+            <img
+              src="/imagenes/noticias%20prensa/prensa%201.jpeg"
+              alt="Equipo de Agencia Marka durante el lanzamiento de la plataforma Marka-E"
+            />
+          </figure>
+
+          <header className="news-feature__headline">
+            <h2>Marka-E lanza su nueva plataforma de noticias empresariales desde el sur de Chile</h2>
+            <ul className="news-feature__meta">
+              <li>Sección: Comunicados de prensa</li>
+              <li>Fecha: 15 de noviembre de 2025</li>
+              <li>Fuente: Agencia Marka</li>
+            </ul>
+          </header>
+
+          <div className="news-feature__content">
+            <p className="news-feature__lead">
+              Este 15 de noviembre, Agencia Marka presentará su nueva plataforma de noticias, Marka-E, que busca convertirse
+              en un espacio de información y conexión para el mundo productivo de la zona sur de Chile.
+            </p>
+            <p>
+              Puerto Montt, octubre de 2025.— El próximo 15 de noviembre iniciará sus operaciones Marka-E, una nueva plataforma
+              digital de noticias empresariales creada para difundir el acontecer económico y productivo del sur de Chile, con
+              una visión que también abarca temas de interés nacional e internacional.
+            </p>
+            <p>
+              El proyecto es una iniciativa conjunta entre David Rivas, director de Marka-E y fundador de Agencia Marka, y
+              Álvaro Figueroa, líder de la empresa tecnológica CodecLand, quienes unen sus experiencias en comunicación y
+              desarrollo digital para dar vida a este espacio informativo.
+            </p>
+            <p>
+              Marka-E está pensada como una ventana pluralista que busca aportar al desarrollo regional desde la información,
+              promoviendo la visibilidad de las grandes empresas y también de las pequeñas y medianas empresas (PyMEs). Entre sus
+              principales áreas de cobertura se encuentran la acuicultura, el turismo, la lechería y las historias de
+              emprendimiento que impulsan la economía del sur del país.
+            </p>
+            <p>
+              Con un enfoque moderno, dinámico y digital, Marka-E aspira a transformarse en un referente informativo que fortalezca
+              los lazos entre el sector productivo, la innovación y la comunidad, entregando contenido relevante, riguroso y de
+              calidad.
+            </p>
+          </div>
+
+          <aside className="news-feature__aside" aria-label="Más comunicados de prensa">
+            <h3>Más comunicados</h3>
+            <ul>
+              <li>Marka-E convocará a empresas regionales para su primera agenda editorial colaborativa.</li>
+              <li>CodecLand presentará workshops sobre transformación digital para PyMEs del sur.</li>
+              <li>Agencia Marka anuncia alianzas estratégicas con medios regionales y gremios productivos.</li>
+              <li>Red de emprendimiento local prepara ciclo de entrevistas especiales con Marka-E.</li>
+            </ul>
+          </aside>
+        </div>
+      </article>
+
+      <div className="news-feature__actions">
+        <Link to="/" className="news-feature__back">
+          Volver al inicio
+        </Link>
+      </div>
+    </section>
+  );
+};
+
 const Header = () => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -370,7 +448,22 @@ const Hero = () => {
           <div className="hero__panel-header" aria-hidden="true">
             <span className="title-badge title-badge--compact">Noticia destacada</span>
           </div>
-          <h2 id="hero-featured">Plan piloto de lechería inteligente reduce 18% la huella hídrica en Llanquihue</h2>
+          <div className="hero__feature-heading">
+            <h2 id="hero-featured">
+              <span className="hero__feature-title-main">
+                Marka-E lanza su nueva{' '}
+                <span className="hero__nowrap">plataforma de noticias empresariales</span>
+              </span>
+              <span className="hero__feature-title-sub">desde el sur de Chile</span>
+            </h2>
+            <Link
+              to="/economia-desarrollo/marka-e"
+              className="hero__feature-cta"
+              aria-label="Leer más sobre el lanzamiento de la plataforma Marka-E"
+            >
+              Leer más → →
+            </Link>
+          </div>
           <div className="hero__media" aria-label="Video destacado">
             <div className="hero__video">
               <iframe
@@ -466,6 +559,14 @@ const WrittenHighlights = () => {
         'Corfo aprobó el proyecto StartupLab Los Lagos, liderado por Patagonia Biotech HUB, que posicionará a Puerto Varas como referente biotecnológico con laboratorios especializados y redes regionales.',
       image: '/imagenes/economia/startup-lab-01.jpg',
       path: '/economia-desarrollo/id',
+    },
+    {
+      id: 'markae-launch',
+      title: 'Marka-E lanza su nueva plataforma de noticias empresariales desde el sur de Chile',
+      excerpt:
+        'Marka-E se estrenará este 15 de noviembre como un espacio informativo para el mundo productivo del sur, impulsado por Agencia Marka y CodecLand.',
+      image: '/imagenes/noticias%20prensa/prensa%201.jpeg',
+      path: '/economia-desarrollo/marka-e',
     },
     {
       id: 1,
@@ -919,6 +1020,7 @@ const HomePage = () => (
       href="https://www.codecland.com"
     />
     <Hero />
+    <WrittenHighlights />
     <BannerSlot
       label="Espacio Banner 2"
       imageSrc="/imagenes/banner-aqualider.gif"
@@ -927,7 +1029,6 @@ const HomePage = () => (
       href="https://www.aqualider.cl"
     />
     <RecentVideos />
-    <WrittenHighlights />
     <Newsletter />
     <EventsFeed />
   </>
@@ -1327,6 +1428,7 @@ function App() {
         <Route path="pymes" element={<PymesPage />} />
         <Route path="economia-desarrollo" element={<EconomiaPage />} />
         <Route path="economia-desarrollo/id" element={<EconomiaIDPage />} />
+        <Route path="economia-desarrollo/marka-e" element={<MarkaELaunchPage />} />
         <Route path="economia-desarrollo/tecnologia" element={<EconomiaTecnologiaPage />} />
         <Route path="economia-desarrollo/servicios" element={<EconomiaServiciosPage />} />
         <Route path="contacto" element={<ContactoPage />} />
