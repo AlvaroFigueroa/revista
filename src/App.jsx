@@ -129,8 +129,10 @@ const MarkaELaunchPage = () => {
 
           <div className="news-feature__content">
             <p className="news-feature__lead">
-              Este 15 de noviembre, Agencia Marka presentará su nueva plataforma de noticias, Marka-E, que busca convertirse
-              en un espacio de información y conexión para el mundo productivo de la zona sur de Chile.
+              <strong>
+                Este 15 de noviembre, Agencia Marka presentará su nueva plataforma de noticias, Marka-E, que busca convertirse
+                en un espacio de información y conexión para el mundo productivo de la zona sur de Chile.
+              </strong>
             </p>
             <p>
               Puerto Montt, octubre de 2025.— El próximo 15 de noviembre iniciará sus operaciones Marka-E, una nueva plataforma
@@ -1228,10 +1230,12 @@ const EconomiaIDPage = () => {
 
         <div className="news-feature__content">
           <p className="news-feature__lead">
-            Corfo aprobó el proyecto StartupLab Los Lagos, liderado por Patagonia Biotech HUB y con base en Puerto Varas, que
-            busca posicionar a la región como referente nacional en biotecnología aplicada y desarrollo sostenible. La iniciativa
-            contempla una inversión de US$ 4,3 millones y reúne a empresas, instituciones públicas y actores del ecosistema
-            científico-tecnológico.
+            <strong>
+              Corfo aprobó el proyecto StartupLab Los Lagos, liderado por Patagonia Biotech HUB y con base en Puerto Varas, que
+              busca posicionar a la región como referente nacional en biotecnología aplicada y desarrollo sostenible. La
+              iniciativa contempla una inversión de US$ 4,3 millones y reúne a empresas, instituciones públicas y actores del
+              ecosistema científico-tecnológico.
+            </strong>
           </p>
           <p>
             En el marco de su estrategia de descentralización de la innovación, Corfo aprobó el proyecto StartupLab Los Lagos,
