@@ -37,6 +37,8 @@ const AdminDashboard = () => {
 
   const currentVideoUrl = useMemo(() => data.videoUrl ?? '', [data.videoUrl]);
   const currentTitle = useMemo(() => data.title ?? '', [data.title]);
+  const currentTag = useMemo(() => data.tag ?? '', [data.tag]);
+  const currentTags = useMemo(() => (Array.isArray(data.tags) ? data.tags : data.tag ? [data.tag] : []), [data.tags, data.tag]);
 
   const scheduleFeedbackClear = useCallback(() => {
     window.setTimeout(() => setFeedback(null), 4000);
@@ -177,6 +179,8 @@ const AdminDashboard = () => {
           <HeroForm
             currentTitle={currentTitle}
             currentVideoUrl={currentVideoUrl}
+            currentTag={currentTag}
+            currentTags={currentTags}
             onSuccess={handleHeroSuccess}
             setFeedback={(payload) => {
               setFeedback(payload);

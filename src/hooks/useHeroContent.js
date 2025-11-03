@@ -7,7 +7,9 @@ const HERO_DOC_ID = 'featured';
 
 const defaultContent = Object.freeze({
   title: 'Plan piloto de lechería inteligente reduce 18% la huella hídrica en Llanquihue',
-  videoUrl: 'https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1'
+  videoUrl: 'https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1',
+  tag: 'Noticia destacada',
+  tags: []
 });
 
 export const HERO_STATUS = Object.freeze({
@@ -30,9 +32,26 @@ export function useHeroContent() {
       (snapshot) => {
         if (snapshot.exists()) {
           const payload = snapshot.data();
+          const rawTag = typeof payload?.tag === 'string' ? payload.tag.trim() : '';
+          const normalizedTags = Array.isArray(payload?.tags)
+            ? payload.tags
+                .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
+                .filter((tag, index, array) => tag.length > 0 && array.indexOf(tag) === index)
+            : rawTag
+            ? [rawTag]
+            : [];
+
           setData({
-            title: typeof payload?.title === 'string' && payload.title.trim().length > 0 ? payload.title.trim() : defaultContent.title,
-            videoUrl: typeof payload?.videoUrl === 'string' && payload.videoUrl.trim().length > 0 ? payload.videoUrl.trim() : defaultContent.videoUrl
+            title:
+              typeof payload?.title === 'string' && payload.title.trim().length > 0
+                ? payload.title.trim()
+                : defaultContent.title,
+            videoUrl:
+              typeof payload?.videoUrl === 'string' && payload.videoUrl.trim().length > 0
+                ? payload.videoUrl.trim()
+                : defaultContent.videoUrl,
+            tag: normalizedTags[0] ?? null,
+            tags: normalizedTags
           });
           setStatus(HERO_STATUS.ready);
         } else {

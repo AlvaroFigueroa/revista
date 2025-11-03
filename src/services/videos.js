@@ -8,6 +8,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
   updateDoc,
   where
 } from 'firebase/firestore';
@@ -57,7 +58,7 @@ export const sanitizeEmbedUrl = (value) => {
   return '';
 };
 
-const normalizeTags = (tags) => {
+export const normalizeTags = (tags) => {
   if (!Array.isArray(tags)) return [];
   return tags
     .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
@@ -139,6 +140,33 @@ export const deleteVideo = async (id) => {
 
   const videoDocRef = doc(db, VIDEOS_COLLECTION, id);
   await deleteDoc(videoDocRef);
+};
+
+const FEATURED_VIDEO_ID = 'hero-featured';
+
+export const upsertFeaturedVideo = async ({ title, embedUrl, tags }) => {
+  const trimmedTitle = typeof title === 'string' ? title.trim() : '';
+  const validEmbedUrl = sanitizeEmbedUrl(embedUrl);
+  const normalizedTags = normalizeTags(tags);
+
+  if (!trimmedTitle || !validEmbedUrl || normalizedTags.length === 0) {
+    throw new Error('El hero requiere título, video y al menos una etiqueta para sincronizarse.');
+  }
+
+  const featuredDocRef = doc(db, VIDEOS_COLLECTION, FEATURED_VIDEO_ID);
+
+  await setDoc(
+    featuredDocRef,
+    {
+      title: trimmedTitle,
+      embedUrl: validEmbedUrl,
+      tags: normalizedTags,
+      isFeatured: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
+  );
 };
 
 export const subscribeToVideos = ({ tag, limit = 10, onNext, onError }) => {

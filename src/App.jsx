@@ -544,6 +544,13 @@ const Hero = () => {
     return 'https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1';
   }, [data.videoUrl]);
 
+  const heroTag = useMemo(() => {
+    if (typeof data.tag === 'string' && data.tag.trim().length > 0) {
+      return data.tag.trim();
+    }
+    return 'Videos recientes';
+  }, [data.tag]);
+
   const loading = status === HERO_STATUS.loading;
 
   return (
@@ -551,7 +558,7 @@ const Hero = () => {
       <div className="hero__content">
         <div className="hero__primary hero__panel hero__panel--feature">
           <div className="hero__panel-header" aria-hidden="true">
-            <span className="title-badge title-badge--compact">Noticia destacada</span>
+            <span className="title-badge title-badge--compact">{heroTag}</span>
           </div>
           <div className="hero__feature-heading">
             <h2 id="hero-featured">
@@ -625,7 +632,16 @@ const RECENT_VIDEOS_TAG = 'Videos recientes';
 const MAX_HOME_VIDEOS = 10;
 
 const RecentVideos = () => {
-  const { items, status, error } = useVideos({ tag: RECENT_VIDEOS_TAG, limit: MAX_HOME_VIDEOS });
+  const { data: heroData } = useHeroContent();
+
+  const activeTag = useMemo(() => {
+    if (typeof heroData?.tag === 'string' && heroData.tag.trim().length > 0) {
+      return heroData.tag.trim();
+    }
+    return RECENT_VIDEOS_TAG;
+  }, [heroData?.tag]);
+
+  const { items, status, error } = useVideos({ tag: activeTag, limit: MAX_HOME_VIDEOS });
 
   const normalizedItems = useMemo(() => {
     const safeItems = Array.isArray(items) ? items.slice(0, MAX_HOME_VIDEOS) : [];
