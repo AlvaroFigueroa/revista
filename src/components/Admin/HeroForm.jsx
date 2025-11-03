@@ -1,30 +1,28 @@
-import React, { useMemo, useState } from 'react';
-import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useMemo, useState } from 'react';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { sanitizeEmbedUrl } from '../../services/videos';
 
 const HERO_COLLECTION = 'hero';
 const HERO_DOC_ID = 'featured';
 
-const YOUTUBE_EMBED_REGEX = /^https:\/\/(www\.)?youtube\.com\/embed\/[-\w]{11}(.*)$/i;
-
-const sanitizeVideoUrl = (value) => {
-  if (!value) return '';
-  const trimmed = value.trim();
-  if (YOUTUBE_EMBED_REGEX.test(trimmed)) {
-    return trimmed;
-  }
-  return '';
-};
-
-const HeroForm = ({ currentTitle, currentVideoUrl, onSuccess, onError }) => {
+const HeroForm = ({ currentTitle, currentVideoUrl, onSuccess, onError, setFeedback }) => {
   const [formData, setFormData] = useState(() => ({
     title: currentTitle ?? '',
     videoUrl: currentVideoUrl ?? ''
   }));
   const [status, setStatus] = useState('idle');
 
+  useEffect(() => {
+    setFormData({
+      title: currentTitle ?? '',
+      videoUrl: currentVideoUrl ?? ''
+    });
+    setStatus('idle');
+  }, [currentTitle, currentVideoUrl]);
+
   const isTitleValid = formData.title.trim().length >= 10;
-  const sanitizedVideoUrl = useMemo(() => sanitizeVideoUrl(formData.videoUrl), [formData.videoUrl]);
+  const sanitizedVideoUrl = useMemo(() => sanitizeEmbedUrl(formData.videoUrl), [formData.videoUrl]);
   const isVideoValid = sanitizedVideoUrl.length > 0;
   const isDirty = formData.title.trim() !== (currentTitle ?? '').trim() || sanitizedVideoUrl !== (currentVideoUrl ?? '')?.trim();
 
@@ -39,16 +37,25 @@ const HeroForm = ({ currentTitle, currentVideoUrl, onSuccess, onError }) => {
 
     try {
       setStatus('saving');
-      await updateDoc(doc(db, HERO_COLLECTION, HERO_DOC_ID), {
-        title: formData.title.trim(),
-        videoUrl: sanitizedVideoUrl,
-        updatedAt: serverTimestamp()
-      });
+      const heroDocRef = doc(db, HERO_COLLECTION, HERO_DOC_ID);
+      await setDoc(
+        heroDocRef,
+        {
+          title: formData.title.trim(),
+          videoUrl: sanitizedVideoUrl,
+          updatedAt: serverTimestamp(),
+          createdAt: serverTimestamp()
+        },
+        { merge: true }
+      );
       setStatus('success');
+      setFormData((prev) => ({ ...prev, videoUrl: sanitizedVideoUrl }));
+      setFeedback?.({ type: 'success', text: 'Hero actualizado correctamente.' });
       onSuccess?.();
     } catch (error) {
       console.error('No pudimos actualizar el hero', error);
       setStatus('error');
+      setFeedback?.({ type: 'error', text: 'No pudimos actualizar el hero. Intenta nuevamente.' });
       onError?.(error);
     }
   };

@@ -2,6 +2,12 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Routes, Route, Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
+import ProtectedRoute from './routes/ProtectedRoute';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLoginPage from './pages/AdminLogin';
+import { useVideos, VIDEOS_STATUS } from './hooks/useVideos';
+import { useAdminRole, ADMIN_ROLE_STATUS } from './hooks/useAdminRole';
+import { useHeroContent, HERO_STATUS } from './hooks/useHeroContent';
 
 const FinancialTicker = () => {
   const [indicators, setIndicators] = useState(null);
@@ -182,9 +188,12 @@ const Header = () => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navRef = useRef(null);
+  const profileMenuRef = useRef(null);
+  const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isAdmin, status: adminStatus } = useAdminRole();
 
   const menuItems = useMemo(
     () => [
@@ -228,11 +237,15 @@ const Header = () => {
       if (navRef.current && !navRef.current.contains(event.target)) {
         setActiveSubmenu(null);
       }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
     };
 
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
         setActiveSubmenu(null);
+        setProfileMenuOpen(false);
       }
     };
 
@@ -246,6 +259,7 @@ const Header = () => {
 
   useEffect(() => {
     setActiveSubmenu(null);
+    setProfileMenuOpen(false);
   }, [location.pathname]);
 
   const toggleSubmenu = (key) => {
@@ -261,7 +275,21 @@ const Header = () => {
     navigate('/auth');
   };
 
+  const toggleProfileMenu = () => {
+    setProfileMenuOpen((current) => !current);
+  };
+
+  const closeProfileMenu = () => {
+    setProfileMenuOpen(false);
+  };
+
+  const handleGoToAdmin = () => {
+    closeProfileMenu();
+    navigate('/admin');
+  };
+
   const handleLogout = async () => {
+    closeProfileMenu();
     try {
       setIsLoggingOut(true);
       await logout();
@@ -269,6 +297,19 @@ const Header = () => {
       setIsLoggingOut(false);
     }
   };
+
+  const isAdminReady =
+    adminStatus === ADMIN_ROLE_STATUS.ready || adminStatus === ADMIN_ROLE_STATUS.error;
+
+  const profileLabel = useMemo(() => {
+    if (!user) return '';
+    return user.displayName || user.email || '';
+  }, [user]);
+
+  const profileInitial = useMemo(() => {
+    const label = profileLabel.trim();
+    return label.length > 0 ? label.charAt(0).toUpperCase() : '';
+  }, [profileLabel]);
 
   return (
     <header className="header">
@@ -325,19 +366,54 @@ const Header = () => {
 
         <div className="header__actions" aria-label="Acciones del usuario">
           {user ? (
-            <>
-              <span className="header__user" aria-live="polite">
-                Hola, {user.displayName || user.email}
-              </span>
+            <div className="header__profile" ref={profileMenuRef}>
               <button
                 type="button"
-                className="header__auth-button"
-                onClick={handleLogout}
-                disabled={isLoggingOut}
+                className={`header__profile-toggle${isProfileMenuOpen ? ' is-open' : ''}`}
+                onClick={toggleProfileMenu}
+                aria-haspopup="menu"
+                aria-expanded={isProfileMenuOpen}
               >
-                {isLoggingOut ? 'Cerrando…' : 'Cerrar sesión'}
+                <span className="header__profile-avatar" aria-hidden="true">
+                  {profileInitial || 'U'}
+                </span>
+                <span className="header__profile-name" aria-live="polite">
+                  {`Hola, ${profileLabel}`}
+                </span>
+                <span className="header__profile-chevron" aria-hidden="true">
+                  {isProfileMenuOpen ? '▲' : '▼'}
+                </span>
               </button>
-            </>
+              {isProfileMenuOpen ? (
+                <div className="header__profile-menu" role="menu">
+                  {isAdminReady && isAdmin ? (
+                    <button
+                      type="button"
+                      className="header__profile-item header__profile-item--highlight"
+                      onClick={handleGoToAdmin}
+                      role="menuitem"
+                    >
+                      <span className="header__profile-item-icon" aria-hidden="true">
+                        ⚙️
+                      </span>
+                      Panel de administración
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="header__profile-item"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    role="menuitem"
+                  >
+                    <span className="header__profile-item-icon" aria-hidden="true">
+                      ↩️
+                    </span>
+                    {isLoggingOut ? 'Cerrando…' : 'Cerrar sesión'}
+                  </button>
+                </div>
+              ) : null}
+            </div>
           ) : (
             <button type="button" className="header__auth-button" onClick={goToAuth}>
               Iniciar sesión
@@ -443,6 +519,33 @@ const BannerSlot = ({ label, imageSrc, mobileImageSrc, alt, href }) => {
 };
 
 const Hero = () => {
+  const { data, status } = useHeroContent();
+
+  const heroTitle = useMemo(() => {
+    if (typeof data.title === 'string' && data.title.trim().length > 0) {
+      return data.title.trim();
+    }
+    return 'Marka-E lanza su nueva plataforma de noticias empresariales desde el sur de Chile';
+  }, [data.title]);
+
+  const [titleMain, titleSub] = useMemo(() => {
+    const separator = '—';
+    if (heroTitle.includes(separator)) {
+      const [main, sub] = heroTitle.split(separator);
+      return [main.trim(), sub.trim()];
+    }
+    return [heroTitle, ''];
+  }, [heroTitle]);
+
+  const heroVideoUrl = useMemo(() => {
+    if (typeof data.videoUrl === 'string' && data.videoUrl.trim().length > 0) {
+      return data.videoUrl.trim();
+    }
+    return 'https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1';
+  }, [data.videoUrl]);
+
+  const loading = status === HERO_STATUS.loading;
+
   return (
     <section className="hero" aria-labelledby="hero-featured">
       <div className="hero__content">
@@ -453,10 +556,9 @@ const Hero = () => {
           <div className="hero__feature-heading">
             <h2 id="hero-featured">
               <span className="hero__feature-title-main">
-                Marka-E lanza su nueva{' '}
-                <span className="hero__nowrap">plataforma de noticias empresariales</span>
+                {titleMain}
               </span>
-              <span className="hero__feature-title-sub">desde el sur de Chile</span>
+              {titleSub ? <span className="hero__feature-title-sub">{titleSub}</span> : null}
             </h2>
             <Link
               to="/economia-desarrollo/marka-e"
@@ -468,13 +570,19 @@ const Hero = () => {
           </div>
           <div className="hero__media" aria-label="Video destacado">
             <div className="hero__video">
-              <iframe
-                src="https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1"
-                title="Video destacado"
-                frameBorder="0"
-                allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              ></iframe>
+              {loading ? (
+                <div className="hero__video-placeholder" role="status" aria-live="polite">
+                  Cargando video destacado…
+                </div>
+              ) : (
+                <iframe
+                  src={heroVideoUrl}
+                  title="Video destacado"
+                  frameBorder="0"
+                  allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              )}
             </div>
           </div>
         </div>
@@ -513,17 +621,50 @@ const Hero = () => {
   );
 };
 
+const RECENT_VIDEOS_TAG = 'Videos recientes';
+const MAX_HOME_VIDEOS = 10;
+
 const RecentVideos = () => {
-  const videos = [
-    { id: 1, title: 'MARKA E | Reporte agroindustrial', url: 'https://www.youtube.com/embed/MwqM5lto7hQ?autoplay=1&mute=1&rel=0&playsinline=1' },
-    { id: 2, title: 'MARKA E | Innovación en turismo rural', url: 'https://www.youtube.com/embed/J38Hgv9mUVU?autoplay=1&mute=1&rel=0&playsinline=1' },
-    { id: 3, title: 'MARKA E | Talento y sostenibilidad', url: 'https://www.youtube.com/embed/uEaZiaooeXA?autoplay=1&mute=1&rel=0&playsinline=1' },
-    { id: 4, title: 'MARKA E | Transformación digital PyME', url: 'https://www.youtube.com/embed/MwqM5lto7hQ?autoplay=1&mute=1&rel=0&playsinline=1' },
-    { id: 5, title: 'MARKA E | Economía circular en el sur', url: 'https://www.youtube.com/embed/J38Hgv9mUVU?autoplay=1&mute=1&rel=0&playsinline=1' },
-    { id: 6, title: 'MARKA E | Historias de exportación', url: 'https://www.youtube.com/embed/uEaZiaooeXA?autoplay=1&mute=1&rel=0&playsinline=1' },
-    { id: 7, title: 'MARKA E | Claves de financiamiento', url: 'https://www.youtube.com/embed/MwqM5lto7hQ?autoplay=1&mute=1&rel=0&playsinline=1' },
-    { id: 8, title: 'MARKA E | Innovación agroalimentaria', url: 'https://www.youtube.com/embed/J38Hgv9mUVU?autoplay=1&mute=1&rel=0&playsinline=1' }
-  ];
+  const { items, status, error } = useVideos({ tag: RECENT_VIDEOS_TAG, limit: MAX_HOME_VIDEOS });
+
+  const normalizedItems = useMemo(() => {
+    const safeItems = Array.isArray(items) ? items.slice(0, MAX_HOME_VIDEOS) : [];
+    const filled = safeItems.map((item, index) => ({
+      ...item,
+      _internalKey: item.id ?? `video-${index}`,
+    }));
+
+    for (let index = filled.length; index < MAX_HOME_VIDEOS; index += 1) {
+      filled.push({
+        id: `placeholder-${index}`,
+        _internalKey: `placeholder-${index}`,
+        isPlaceholder: true,
+      });
+    }
+
+    return filled;
+  }, [items]);
+
+  const loading = status === VIDEOS_STATUS.loading;
+  const hasError = status === VIDEOS_STATUS.error;
+  const isEmpty = status === VIDEOS_STATUS.empty;
+
+  const statusMessage = (() => {
+    if (hasError) {
+      return error?.message
+        ? `${error.message}. Mostramos espacios reservados.`
+        : 'No pudimos cargar los videos. Mostramos espacios reservados.';
+    }
+    if (isEmpty) {
+      return 'Aún no hay videos asociados a esta etiqueta. Mantendremos los espacios disponibles.';
+    }
+    if (loading) {
+      return 'Cargando videos seleccionados…';
+    }
+    return null;
+  })();
+
+  const statusRole = hasError ? 'alert' : loading ? 'status' : 'note';
 
   return (
     <section className="videos" aria-labelledby="recent-videos">
@@ -532,21 +673,50 @@ const RecentVideos = () => {
           <span className="title-badge">Videos recientes</span>
         </h2>
       </div>
-      <div className="videos__grid">
-        {videos.map((video) => (
-          <article key={video.id} className="video-card">
-            <div className="video-card__player">
-              <iframe
-                src={video.url}
-                title={video.title}
-                frameBorder="0"
-                allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              ></iframe>
-            </div>
-            <div className="video-card__meta">{video.title}</div>
-          </article>
-        ))}
+      {statusMessage ? (
+        <p
+          className={`videos__status videos__status--${hasError ? 'error' : loading ? 'loading' : 'note'}`}
+          role={statusRole}
+        >
+          {statusMessage}
+        </p>
+      ) : null}
+      <div className="videos__grid" role="list">
+        {normalizedItems.map((video) => {
+          if (video.isPlaceholder) {
+            return (
+              <article
+                key={video._internalKey}
+                className="video-card video-card--placeholder"
+                role="listitem"
+                aria-label="Video disponible próximamente"
+              >
+                <div className="video-card__player video-card__player--placeholder">
+                  <div className="video-card__player-overlay">Video disponible próximamente</div>
+                </div>
+                <div className="video-card__meta video-card__meta--placeholder">Reserva para próximos contenidos</div>
+              </article>
+            );
+          }
+
+          const title = typeof video.title === 'string' && video.title.trim().length > 0 ? video.title : 'Video sin título';
+          const embedUrl = typeof video.embedUrl === 'string' ? video.embedUrl : '';
+
+          return (
+            <article key={video._internalKey} className="video-card" role="listitem">
+              <div className="video-card__player">
+                <iframe
+                  src={embedUrl}
+                  title={title}
+                  frameBorder="0"
+                  allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <div className="video-card__meta">{title}</div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
@@ -1430,6 +1600,10 @@ function App() {
         <Route path="economia-desarrollo/servicios" element={<EconomiaServiciosPage />} />
         <Route path="contacto" element={<ContactoPage />} />
         <Route path="auth" element={<AuthPage />} />
+      </Route>
+      <Route path="admin/login" element={<AdminLoginPage />} />
+      <Route path="admin" element={<ProtectedRoute />}>
+        <Route index element={<AdminDashboard />} />
       </Route>
     </Routes>
   );
