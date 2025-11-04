@@ -8,6 +8,10 @@ import VideoList from '../components/Admin/VideoList';
 import { HOME_SECTION_TITLES } from '../constants/homeSections';
 import { useVideos, VIDEOS_STATUS } from '../hooks/useVideos';
 import { createVideo, updateVideo, deleteVideo } from '../services/videos';
+import NewsForm from '../components/Admin/NewsForm';
+import NewsList from '../components/Admin/NewsList';
+import { useNews, NEWS_STATUS } from '../hooks/useNews';
+import { createNews, updateNews, deleteNews } from '../services/news';
 
 const DEFAULT_VIDEOS_TAG =
   HOME_SECTION_TITLES.find((title) => title === 'Videos recientes') ?? HOME_SECTION_TITLES[0];
@@ -22,6 +26,16 @@ const AdminDashboard = () => {
     limit: 10
   });
 
+  const [newsTagFilter, setNewsTagFilter] = useState('');
+  const {
+    items: newsItems,
+    status: newsStatus,
+    error: newsError
+  } = useNews({
+    tag: newsTagFilter,
+    limit: 25
+  });
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formMode, setFormMode] = useState('create');
   const [formDefaults, setFormDefaults] = useState(null);
@@ -30,6 +44,14 @@ const AdminDashboard = () => {
   const [formError, setFormError] = useState(null);
   const [formInstanceKey, setFormInstanceKey] = useState(0);
   const [feedback, setFeedback] = useState(null);
+
+  const [isNewsFormOpen, setIsNewsFormOpen] = useState(false);
+  const [newsFormMode, setNewsFormMode] = useState('create');
+  const [newsFormDefaults, setNewsFormDefaults] = useState(null);
+  const [editingNews, setEditingNews] = useState(null);
+  const [newsFormStatus, setNewsFormStatus] = useState('idle');
+  const [newsFormError, setNewsFormError] = useState(null);
+  const [newsFormInstanceKey, setNewsFormInstanceKey] = useState(0);
 
   const handleHeroSuccess = useCallback(() => {
     // El contenido del hero se actualiza automáticamente con el onSnapshot del hook.
@@ -80,8 +102,8 @@ const AdminDashboard = () => {
     setFormMode('create');
     setEditingVideo(null);
     setFormDefaults(null);
-    resetFormState();
-  }, [resetFormState]);
+    setFormError(null);
+  }, []);
 
   const handleFormSubmit = async (payload) => {
     setFormStatus('saving');
@@ -113,6 +135,105 @@ const AdminDashboard = () => {
     }
   };
 
+  const resetNewsFormState = useCallback(() => {
+    setNewsFormStatus('idle');
+    setNewsFormError(null);
+  }, []);
+
+  const openNewsCreateForm = useCallback(() => {
+    setNewsFormMode('create');
+    setEditingNews(null);
+    setNewsFormDefaults({
+      title: '',
+      lead: '',
+      body: '',
+      source: '',
+      imageUrl: '',
+      articleDate: '',
+      tags: newsTagFilter ? [newsTagFilter] : []
+    });
+    setIsNewsFormOpen(true);
+    resetNewsFormState();
+    setNewsFormInstanceKey((prev) => prev + 1);
+  }, [newsTagFilter, resetNewsFormState]);
+
+  const openNewsEditForm = useCallback(
+    (news) => {
+      setNewsFormMode('edit');
+      setEditingNews(news);
+      setNewsFormDefaults({
+        title: news.title ?? '',
+        lead: news.lead ?? '',
+        body: news.body ?? '',
+        source: news.source ?? '',
+        imageUrl: news.imageUrl ?? '',
+        articleDate: news.articleDate ?? '',
+        tags: Array.isArray(news.tags) ? news.tags : []
+      });
+      setIsNewsFormOpen(true);
+      resetNewsFormState();
+      setNewsFormInstanceKey((prev) => prev + 1);
+    },
+    [resetNewsFormState]
+  );
+
+  const closeNewsForm = useCallback(() => {
+    setIsNewsFormOpen(false);
+    setNewsFormMode('create');
+    setEditingNews(null);
+    setNewsFormDefaults(null);
+    resetNewsFormState();
+  }, [resetNewsFormState]);
+
+  const handleNewsSubmit = async (payload) => {
+    setNewsFormStatus('saving');
+    setNewsFormError(null);
+
+    try {
+      if (newsFormMode === 'edit' && editingNews?.id) {
+        await updateNews(editingNews.id, payload);
+        setNewsFormStatus('success');
+        window.setTimeout(() => closeNewsForm(), 800);
+      } else {
+        await createNews(payload);
+        setNewsFormStatus('success');
+        setNewsFormDefaults({
+          title: '',
+          lead: '',
+          body: '',
+          source: '',
+          imageUrl: '',
+          articleDate: '',
+          tags: payload.tags && payload.tags.length > 0 ? payload.tags : newsTagFilter ? [newsTagFilter] : []
+        });
+        setNewsFormInstanceKey((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error('No pudimos guardar la noticia', error);
+      setNewsFormStatus('error');
+      setNewsFormError(error.message || 'No pudimos guardar la noticia. Intenta nuevamente.');
+    }
+  };
+
+  const handleNewsDelete = async (news) => {
+    if (!news?.id) return;
+    const confirmation = window.confirm(`¿Eliminar la noticia “${news.title}”?`);
+    if (!confirmation) return;
+
+    try {
+      await deleteNews(news.id);
+      setFeedback({ type: 'success', text: 'Noticia eliminada correctamente.' });
+      scheduleFeedbackClear();
+    } catch (error) {
+      console.error('No pudimos eliminar la noticia', error);
+      setFeedback({
+        type: 'error',
+        text: error.message || 'No pudimos eliminar la noticia. Intenta nuevamente.'
+      });
+      scheduleFeedbackClear();
+    }
+  };
+
   const handleDelete = async (video) => {
     if (!video?.id) return;
     const confirmation = window.confirm(`¿Eliminar el video “${video.title}”?`);
@@ -136,8 +257,16 @@ const AdminDashboard = () => {
     setSelectedTag(event.target.value);
   };
 
+  const handleNewsTagChange = (event) => {
+    const value = event.target.value;
+    setNewsTagFilter(value === 'Todas' ? '' : value);
+  };
+
   const videosStatusForList =
     videosStatus === VIDEOS_STATUS.ready && videos.length === 0 ? VIDEOS_STATUS.empty : videosStatus;
+
+  const newsStatusForList =
+    newsStatus === NEWS_STATUS.ready && newsItems.length === 0 ? NEWS_STATUS.empty : newsStatus;
 
   return (
     <section className="admin-dashboard" aria-labelledby="admin-dashboard-title">
@@ -251,6 +380,67 @@ const AdminDashboard = () => {
             onEdit={openEditForm}
             onDelete={handleDelete}
           />
+
+          {feedback ? (
+            <p
+              className={`admin-dashboard__status admin-dashboard__status--${feedback.type}`}
+              role={feedback.type === 'error' ? 'alert' : 'status'}
+            >
+              {feedback.text}
+            </p>
+          ) : null}
+        </article>
+
+        <article className="admin-dashboard__module admin-dashboard__module--news">
+          <header className="admin-dashboard__module-header">
+            <div>
+              <h2>Noticias (Otras noticias)</h2>
+              <p className="admin-dashboard__helper">
+                Publica artículos con fotografía, bajada en negrita y etiquetas por sección. Se mostrarán en las páginas
+                correspondientes y en la portada.
+              </p>
+            </div>
+            <div className="admin-dashboard__module-actions">
+              <label className="admin-dashboard__select">
+                <span>Filtrar por sección</span>
+                <select value={newsTagFilter || 'Todas'} onChange={handleNewsTagChange}>
+                  <option value="Todas">Todas</option>
+                  {HOME_SECTION_TITLES.map((tag) => (
+                    <option key={tag} value={tag}>
+                      {tag}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button type="button" onClick={isNewsFormOpen ? closeNewsForm : openNewsCreateForm}>
+                {isNewsFormOpen ? 'Cerrar formulario' : 'Agregar noticia'}
+              </button>
+            </div>
+          </header>
+
+          {newsError ? (
+            <div className="admin-dashboard__status admin-dashboard__status--error" role="alert">
+              <p>{newsError.message || 'No pudimos cargar las noticias. Intenta nuevamente.'}</p>
+            </div>
+          ) : null}
+
+          {isNewsFormOpen ? (
+            <NewsForm
+              key={newsFormInstanceKey}
+              mode={newsFormMode}
+              defaultValues={newsFormDefaults}
+              status={newsFormStatus}
+              errorMessage={newsFormError}
+              onSubmit={handleNewsSubmit}
+              onCancel={closeNewsForm}
+              onFeedback={(payload) => {
+                setFeedback(payload);
+                scheduleFeedbackClear();
+              }}
+            />
+          ) : null}
+
+          <NewsList items={newsItems} status={newsStatusForList} onEdit={openNewsEditForm} onDelete={handleNewsDelete} />
 
           {feedback ? (
             <p
