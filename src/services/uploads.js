@@ -1,8 +1,8 @@
 const NEWS_UPLOAD_ENDPOINT = 'https://www.markae.cl/upload-news-image.php';
-const NEWS_UPLOAD_TOKEN = import.meta.env.VITE_NEWS_UPLOAD_TOKEN;
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const ALLOWED_MIME_TYPES = Object.freeze(['image/jpeg', 'image/png', 'image/webp']);
+const ARTICLE_ID_PATTERN = /^[a-zA-Z0-9_-]{6,}$/;
 
 class UploadError extends Error {
   constructor(message, options = {}) {
@@ -16,11 +16,6 @@ class UploadError extends Error {
 const ensureEndpointAvailable = () => {
   if (!NEWS_UPLOAD_ENDPOINT || typeof NEWS_UPLOAD_ENDPOINT !== 'string') {
     throw new UploadError('El endpoint de subida no está configurado.');
-  }
-  if (!NEWS_UPLOAD_TOKEN || typeof NEWS_UPLOAD_TOKEN !== 'string') {
-    throw new UploadError(
-      'El token de autenticación para la subida de imágenes no está configurado. Configura VITE_NEWS_UPLOAD_TOKEN.'
-    );
   }
 };
 
@@ -36,18 +31,25 @@ const validateFile = (file) => {
   }
 };
 
-export const uploadNewsImage = async (file) => {
+const validateArticleId = (articleId) => {
+  if (typeof articleId !== 'string' || !ARTICLE_ID_PATTERN.test(articleId)) {
+    throw new UploadError(
+      'No pudimos determinar el identificador interno del artículo. Intenta guardar nuevamente.'
+    );
+  }
+};
+
+export const uploadNewsImage = async (file, articleId) => {
   ensureEndpointAvailable();
   validateFile(file);
+  validateArticleId(articleId);
 
   const payload = new FormData();
   payload.append('image', file);
+  payload.append('articleId', articleId);
 
   const response = await fetch(NEWS_UPLOAD_ENDPOINT, {
     method: 'POST',
-    headers: {
-      'X-Upload-Token': NEWS_UPLOAD_TOKEN
-    },
     body: payload
   });
 

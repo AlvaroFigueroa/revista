@@ -6,6 +6,7 @@ import { uploadNewsImage, UploadError } from '../../services/uploads';
 const MIN_TITLE_LENGTH = 10;
 const MIN_LEAD_LENGTH = 40;
 const MIN_BODY_LENGTH = 120;
+const ARTICLE_ID_MIN_LENGTH = 6;
 
 const toInputDate = (value) => {
   if (!value) return '';
@@ -44,6 +45,7 @@ const formatPreviewDate = (value) => {
 };
 
 const getInitialState = (defaults) => ({
+  id: defaults?.id ?? '',
   title: defaults?.title ?? '',
   lead: defaults?.lead ?? '',
   body: defaults?.body ?? '',
@@ -76,7 +78,16 @@ const NewsForm = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [defaultValues?.title, defaultValues?.lead, defaultValues?.body, defaultValues?.source, defaultValues?.articleDate, defaultValues?.tags, defaultValues?.imageUrl]);
+  }, [
+    defaultValues?.id,
+    defaultValues?.title,
+    defaultValues?.lead,
+    defaultValues?.body,
+    defaultValues?.source,
+    defaultValues?.articleDate,
+    defaultValues?.tags,
+    defaultValues?.imageUrl
+  ]);
 
   useEffect(() => {
     if (!imageFile) return undefined;
@@ -145,18 +156,20 @@ const NewsForm = ({
     setLocalError(null);
   };
 
+  const trimmedId = (formData.id ?? '').trim();
   const trimmedTitle = formData.title.trim();
   const trimmedLead = formData.lead.trim();
   const trimmedBody = formData.body.trim();
   const trimmedSource = formData.source.trim();
   const trimmedDate = formData.articleDate.trim();
 
+  const isIdValid = trimmedId.length >= ARTICLE_ID_MIN_LENGTH;
   const isTitleValid = trimmedTitle.length >= MIN_TITLE_LENGTH;
   const isLeadValid = trimmedLead.length >= MIN_LEAD_LENGTH;
   const isBodyValid = trimmedBody.length >= MIN_BODY_LENGTH;
   const areTagsValid = Array.isArray(formData.tags) && formData.tags.length > 0;
   const isDateValid = trimmedDate.length > 0;
-  const isImageProvided = Boolean(imageFile || formData.imageUrl);
+  const isImageProvided = Boolean(imageFile || formData.imageUrl.trim());
 
   const formSnapshot = useMemo(() => JSON.stringify(getInitialState(defaultValues)), [defaultValues]);
   const currentSnapshot = useMemo(
@@ -176,6 +189,7 @@ const NewsForm = ({
 
   const canSubmit =
     typeof onSubmit === 'function' &&
+    isIdValid &&
     isTitleValid &&
     isLeadValid &&
     isBodyValid &&
@@ -194,10 +208,11 @@ const NewsForm = ({
     try {
       let finalImageUrl = formData.imageUrl ?? '';
       if (imageFile) {
-        finalImageUrl = await uploadNewsImage(imageFile);
+        finalImageUrl = await uploadNewsImage(imageFile, trimmedId);
       }
 
       await onSubmit({
+        id: trimmedId,
         title: trimmedTitle,
         lead: trimmedLead,
         body: trimmedBody,
@@ -223,6 +238,17 @@ const NewsForm = ({
     <form className="admin-form news-form" onSubmit={handleSubmit} noValidate>
       <fieldset disabled={status === 'saving'}>
         <legend>{mode === 'edit' ? 'Editar noticia' : 'Agregar nueva noticia'}</legend>
+
+        <div className="admin-form__field">
+          <label htmlFor="news-id">Identificador interno</label>
+          <input id="news-id" name="id" type="text" value={formData.id} onChange={handleInputChange} readOnly />
+          <small>Se utiliza para almacenar la imagen y sincronizar con Firestore.</small>
+          {!isIdValid ? (
+            <p className="admin-form__hint">
+              No se pudo generar el identificador de la noticia. Cierra y vuelve a abrir el formulario.
+            </p>
+          ) : null}
+        </div>
 
         <div className="admin-form__field">
           <label htmlFor="news-title">Título</label>
@@ -335,6 +361,17 @@ const NewsForm = ({
             ref={fileInputRef}
           />
           <small>Formatos permitidos: JPG, PNG o WebP. Máximo 5MB.</small>
+          <div className="news-form__alternate-url">
+            <label htmlFor="news-image-url">O pega la URL de una imagen existente</label>
+            <input
+              id="news-image-url"
+              name="imageUrl"
+              type="url"
+              placeholder="https://..."
+              value={formData.imageUrl}
+              onChange={handleInputChange}
+            />
+          </div>
           {imagePreview ? (
             <figure className="news-form__preview" aria-label="Previsualización de la imagen">
               <img src={imagePreview} alt="Previsualización de la noticia" />
@@ -404,7 +441,8 @@ NewsForm.propTypes = {
     source: PropTypes.string,
     articleDate: PropTypes.any,
     tags: PropTypes.arrayOf(PropTypes.string),
-    imageUrl: PropTypes.string
+    imageUrl: PropTypes.string,
+    id: PropTypes.string
   }),
   status: PropTypes.oneOf(['idle', 'saving', 'success', 'error']),
   errorMessage: PropTypes.string,

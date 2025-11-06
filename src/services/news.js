@@ -21,6 +21,8 @@ const NEWS_COLLECTION = 'news';
 
 const newsCollectionRef = collection(db, NEWS_COLLECTION);
 
+export const generateNewsId = () => doc(newsCollectionRef).id;
+
 const trimText = (value) => {
   if (typeof value !== 'string') return '';
   return value.trim();
@@ -58,6 +60,7 @@ const parseArticleDate = (value) => {
 };
 
 export const createNews = async ({
+  id,
   title,
   lead,
   body,
@@ -107,11 +110,9 @@ export const createNews = async ({
     slug: newsSlug
   };
 
-  if (!slug && publishedAt === now) {
-    payload.articleDate = now;
-  }
-
-  return addDoc(newsCollectionRef, payload);
+  const docRef = id ? doc(newsCollectionRef, id) : doc(newsCollectionRef);
+  await setDoc(docRef, payload);
+  return docRef;
 };
 
 export const updateNews = async (

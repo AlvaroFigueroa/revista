@@ -11,7 +11,7 @@ import { createVideo, updateVideo, deleteVideo } from '../services/videos';
 import NewsForm from '../components/Admin/NewsForm';
 import NewsList from '../components/Admin/NewsList';
 import { useNews, NEWS_STATUS } from '../hooks/useNews';
-import { createNews, updateNews, deleteNews } from '../services/news';
+import { createNews, updateNews, deleteNews, generateNewsId } from '../services/news';
 
 const DEFAULT_VIDEOS_TAG =
   HOME_SECTION_TITLES.find((title) => title === 'Videos recientes') ?? HOME_SECTION_TITLES[0];
@@ -144,6 +144,7 @@ const AdminDashboard = () => {
     setNewsFormMode('create');
     setEditingNews(null);
     setNewsFormDefaults({
+      id: generateNewsId(),
       title: '',
       lead: '',
       body: '',
@@ -162,6 +163,7 @@ const AdminDashboard = () => {
       setNewsFormMode('edit');
       setEditingNews(news);
       setNewsFormDefaults({
+        id: news.id ?? '',
         title: news.title ?? '',
         lead: news.lead ?? '',
         body: news.body ?? '',
@@ -191,13 +193,16 @@ const AdminDashboard = () => {
 
     try {
       if (newsFormMode === 'edit' && editingNews?.id) {
-        await updateNews(editingNews.id, payload);
+        const { id: _ignoredId, ...updates } = payload;
+        await updateNews(editingNews.id, updates);
         setNewsFormStatus('success');
         window.setTimeout(() => closeNewsForm(), 800);
       } else {
-        await createNews(payload);
+        const { id: articleId, ...newsPayload } = payload;
+        await createNews({ id: articleId, ...newsPayload });
         setNewsFormStatus('success');
         setNewsFormDefaults({
+          id: generateNewsId(),
           title: '',
           lead: '',
           body: '',

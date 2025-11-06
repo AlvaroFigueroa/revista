@@ -8,6 +8,7 @@ import AdminLoginPage from './pages/AdminLogin';
 import { useVideos, VIDEOS_STATUS } from './hooks/useVideos';
 import { useAdminRole, ADMIN_ROLE_STATUS } from './hooks/useAdminRole';
 import { useHeroContent, HERO_STATUS } from './hooks/useHeroContent';
+import { useNews, NEWS_STATUS } from './hooks/useNews';
 
 const FinancialTicker = () => {
   const [indicators, setIndicators] = useState(null);
@@ -628,6 +629,10 @@ const Hero = () => {
   );
 };
 
+const OTHER_NEWS_TAG = 'Otras noticias y comunicados de prensa';
+const OTHER_NEWS_LIMIT = 10;
+const FALLBACK_NEWS_IMAGE = 'https://placehold.co/640x360?text=Noticia';
+
 const RECENT_VIDEOS_TAG = 'Videos recientes';
 const MAX_HOME_VIDEOS = 10;
 
@@ -738,81 +743,43 @@ const RecentVideos = () => {
   );
 };
 
+const truncateText = (text, maxLength = 180) => {
+  if (typeof text !== 'string') return '';
+  const trimmed = text.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  return `${trimmed.slice(0, maxLength - 1).trimEnd()}…`;
+};
+
 const WrittenHighlights = () => {
-  const articles = [
-    {
-      id: 'economia-id',
-      title: 'Puerto Varas se consolida como polo biotecnológico del sur con nuevo StartupLab Los Lagos',
-      excerpt:
-        'Corfo aprobó el proyecto StartupLab Los Lagos, liderado por Patagonia Biotech HUB, que posicionará a Puerto Varas como referente biotecnológico con laboratorios especializados y redes regionales.',
-      image: '/imagenes/economia/startup-lab-01.jpg',
-      path: '/economia-desarrollo/id',
-    },
-    {
-      id: 'markae-launch',
-      title: 'Marka-E lanza su nueva plataforma de noticias empresariales desde el sur de Chile',
-      excerpt:
-        'Marka-E se estrenará este 15 de noviembre como un espacio informativo para el mundo productivo del sur, impulsado por Agencia Marka y CodecLand.',
-      image: '/imagenes/noticias%20prensa/prensa%201.jpeg',
-      path: '/economia-desarrollo/marka-e',
-    },
-    {
-      id: 1,
-      title: '¿Puede el entrenamiento con ejercicios de fuerza ser un aliado en el tratamiento del cáncer de mama?',
-      excerpt:
-        'El ensayo clínico Neo Strong, liderado por FALP junto a la UFRO y la Universidad Cruzeiro do Sul, evalúa cómo el entrenamiento de fuerza durante la quimioterapia ayuda a mujeres con cáncer de mama a mantener energía, masa muscular y calidad de vida.',
-      image: '/imagenes/Gissela Castillo (5) (1).png',
-    },
-    {
-      id: 2,
-      title: 'Bci es reconocido como la empresa más innovadora en el sector bancario en Chile',
-      excerpt:
-        'El ranking Most Innovative Companies destacó a Bci por liderar la innovación bancaria con un ecosistema digital de pagos, alianzas con startups y procesos que generan valor a clientes y colaboradores.',
-      image: '/imagenes/premiacion1.png',
-    },
-    {
-      id: 3,
-      title: 'Cooperación público-privada financiará 40 proyectos agroindustriales en Los Lagos',
-      excerpt:
-        'Corfo y Sercotec anunciaron un fondo colaborativo de $2.500 millones para impulsar plantas procesadoras, innovación alimentaria y tecnologías limpias en la macrozona sur.',
-      image: '/imagenes/premiacion1.png',
-    },
-    {
-      id: 4,
-      title: 'Turismo rural: alianzas comunitarias amplían la oferta durante la temporada baja',
-      excerpt:
-        'Municipios y cámaras de turismo lanzaron circuitos de otoño-invierno que combinan gastronomía local, termas y experiencias culturales en siete comunas del sur austral.',
-      image: '/imagenes/Gissela Castillo (5) (1).png',
-    },
-    {
-      id: 5,
-      title: 'Startups logísticas de la Patagonia levantan inversión semilla para expandirse a Perú',
-      excerpt:
-        'Tres empresas chilenas de trazabilidad en frío y transporte multimodal cerraron rondas por US$6 millones para escalar servicios a exportadores de alimentos.',
-      image: '/imagenes/premiacion1.png',
-    },
-    {
-      id: 6,
-      title: 'Programa de eficiencia energética permitirá reducir costos a 120 PyME’s del sur',
-      excerpt:
-        'La Agencia de Sustentabilidad y Cambio Climático instalará sensores inteligentes y capacitará equipos internos para optimizar consumo eléctrico en manufactura y agroindustria.',
-      image: '/imagenes/Gissela Castillo (5) (1).png',
-    },
-    {
-      id: 7,
-      title: 'Fondos de innovación apoyan bioplásticos desarrollados con desechos lecheros',
-      excerpt:
-        'Investigadores de la Universidad Austral lideran un consorcio que transforma suero y residuos orgánicos en materiales compostables para packaging alimentario.',
-      image: '/imagenes/premiacion1.png',
-    },
-    {
-      id: 8,
-      title: 'Más de 60 emprendedoras se gradúan del programa Ruta Exportadora en Chiloé',
-      excerpt:
-        'Sercotec y ProChile acompañaron a microempresas turísticas y gastronómicas para abrir mercados internacionales mediante vitrinas digitales y asesoría logística.',
-      image: '/imagenes/Gissela Castillo (5) (1).png',
-    },
-  ];
+  const { items, status, error } = useNews({ tag: OTHER_NEWS_TAG, limit: OTHER_NEWS_LIMIT });
+
+  const normalizedItems = useMemo(() => {
+    if (!Array.isArray(items)) return [];
+
+    return items.slice(0, OTHER_NEWS_LIMIT).map((item, index) => {
+      const title =
+        typeof item.title === 'string' && item.title.trim().length > 0 ? item.title.trim() : 'Noticia sin título';
+      const lead = typeof item.lead === 'string' ? item.lead : '';
+      const body = typeof item.body === 'string' ? item.body : '';
+      const excerptSource = lead.trim().length > 0 ? lead : body;
+      const excerpt = truncateText(
+        excerptSource.length > 0 ? excerptSource : 'Pronto añadiremos más detalles de esta noticia.'
+      );
+      const imageUrl =
+        typeof item.imageUrl === 'string' && item.imageUrl.trim().length > 0
+          ? item.imageUrl.trim()
+          : FALLBACK_NEWS_IMAGE;
+      const slug = typeof item.slug === 'string' && item.slug.trim().length > 0 ? item.slug.trim() : null;
+
+      return {
+        id: item.id ?? `news-${index}`,
+        title,
+        excerpt,
+        imageUrl,
+        slug,
+      };
+    });
+  }, [items]);
 
   return (
     <section className="written" aria-labelledby="written-highlights">
@@ -822,24 +789,44 @@ const WrittenHighlights = () => {
         </h2>
       </div>
       <div className="written__grid">
-        {articles.slice(0, 10).map((article) => (
-          <article key={article.id} className="written-card">
-            <div className="written-card__image">
-              <img src={article.image} alt={article.title} />
-            </div>
-            <div className="written-card__content">
-              <h3>{article.title}</h3>
-              <p>{article.excerpt}</p>
-              {article.path ? (
-                <Link to={article.path} className="written-card__cta" aria-label={`Leer más sobre ${article.title}`}>
-                  Leer más
-                </Link>
-              ) : (
-                <a href="#" className="written-card__cta">Leer más</a>
-              )}
-            </div>
-          </article>
-        ))}
+        {status === NEWS_STATUS.loading ? (
+          <p className="written__status" role="status">
+            Cargando noticias…
+          </p>
+        ) : status === NEWS_STATUS.error ? (
+          <div className="written__status written__status--error" role="alert">
+            <p>No pudimos cargar las noticias. Intenta nuevamente.</p>
+            {error?.message ? <p>{error.message}</p> : null}
+          </div>
+        ) : normalizedItems.length === 0 ? (
+          <p className="written__status" role="note">
+            Aún no hay noticias registradas en esta sección.
+          </p>
+        ) : (
+          normalizedItems.map((article) => {
+            const href = article.slug ? `/noticias/${article.slug}` : null;
+            return (
+              <article key={article.id} className="written-card">
+                <div className="written-card__image">
+                  <img src={article.imageUrl} alt={article.title} loading="lazy" />
+                </div>
+                <div className="written-card__content">
+                  <h3>{article.title}</h3>
+                  <p>{article.excerpt}</p>
+                  {href ? (
+                    <Link to={href} className="written-card__cta" aria-label={`Leer más sobre ${article.title}`}>
+                      Leer más
+                    </Link>
+                  ) : (
+                    <span className="written-card__cta" aria-disabled="true">
+                      Leer más
+                    </span>
+                  )}
+                </div>
+              </article>
+            );
+          })
+        )}
       </div>
     </section>
   );
