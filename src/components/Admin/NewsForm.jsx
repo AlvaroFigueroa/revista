@@ -1,3 +1,4 @@
+import { NAVIGATION_TAGS } from '../../constants/navigationTags';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { HOME_SECTION_TITLES } from '../../constants/homeSections';
@@ -69,6 +70,10 @@ const NewsForm = ({
   const [imagePreview, setImagePreview] = useState(() => defaultValues?.imageUrl ?? '');
   const [localError, setLocalError] = useState(null);
   const fileInputRef = useRef(null);
+  const combinedTags = useMemo(
+    () => Array.from(new Set([...HOME_SECTION_TITLES, ...Object.values(NAVIGATION_TAGS)])),
+    []
+  );
 
   useEffect(() => {
     setFormData(getInitialState(defaultValues));
@@ -330,7 +335,7 @@ const NewsForm = ({
         <div className="admin-form__field">
           <span>Secciones (elige al menos una)</span>
           <div className="video-form__tags">
-            {HOME_SECTION_TITLES.map((tag) => {
+            {combinedTags.map((tag) => {
               const isActive = formData.tags.includes(tag);
               return (
                 <button

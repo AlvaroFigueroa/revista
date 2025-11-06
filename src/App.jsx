@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Routes, Route, Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -9,6 +9,59 @@ import { useVideos, VIDEOS_STATUS } from './hooks/useVideos';
 import { useAdminRole, ADMIN_ROLE_STATUS } from './hooks/useAdminRole';
 import { useHeroContent, HERO_STATUS } from './hooks/useHeroContent';
 import { useNews, NEWS_STATUS } from './hooks/useNews';
+import { NAVIGATION_TAGS } from './constants/navigationTags';
+import { getNewsBySlug } from './services/news';
+
+const TAG_TO_PATH = Object.entries(NAVIGATION_TAGS).reduce((accumulator, [path, label]) => {
+  if (typeof label === 'string' && label.trim().length > 0) {
+    accumulator[label.trim()] = path;
+  }
+  return accumulator;
+}, {});
+
+const resolvePrimaryTag = (tags) => {
+  if (!Array.isArray(tags)) return null;
+  for (const tagValue of tags) {
+    const normalized = typeof tagValue === 'string' ? tagValue.trim() : '';
+    if (normalized && TAG_TO_PATH[normalized]) {
+      return {
+        path: TAG_TO_PATH[normalized],
+        label: normalized,
+      };
+    }
+  }
+  return null;
+};
+
+const getPreferredPathForTags = (tags) => resolvePrimaryTag(tags)?.path ?? null;
+
+const toJSDate = (value) => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === 'string' || typeof value === 'number') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value.toDate === 'function') {
+    const parsed = value.toDate();
+    return parsed instanceof Date && !Number.isNaN(parsed.getTime()) ? parsed : null;
+  }
+  return null;
+};
+
+const splitBodyIntoParagraphs = (body) => {
+  if (typeof body !== 'string') return [];
+  return body
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => paragraph.length > 0);
+};
+
+const ARTICLE_DATE_FORMATTER = new Intl.DateTimeFormat('es-CL', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
 
 const FinancialTicker = () => {
   const [indicators, setIndicators] = useState(null);
@@ -631,7 +684,185 @@ const Hero = () => {
 
 const OTHER_NEWS_TAG = 'Otras noticias y comunicados de prensa';
 const OTHER_NEWS_LIMIT = 10;
+const SECTION_NEWS_LIMIT = 10;
 const FALLBACK_NEWS_IMAGE = 'https://placehold.co/640x360?text=Noticia';
+
+const DETAIL_STATUS = Object.freeze({
+  loading: 'loading',
+  ready: 'ready',
+  notFound: 'not_found',
+  error: 'error',
+});
+
+const normalizeNewsArticle = (raw) => {
+  if (!raw || typeof raw !== 'object') return null;
+  const title =
+    typeof raw.title === 'string' && raw.title.trim().length > 0 ? raw.title.trim() : 'Noticia sin título';
+  const lead = typeof raw.lead === 'string' ? raw.lead.trim() : '';
+  const bodyParagraphs = splitBodyIntoParagraphs(raw.body);
+  const imageUrl =
+    typeof raw.imageUrl === 'string' && raw.imageUrl.trim().length > 0 ? raw.imageUrl.trim() : FALLBACK_NEWS_IMAGE;
+  const tags = Array.isArray(raw.tags) ? raw.tags : [];
+  const publishedAt = toJSDate(raw.articleDate) ?? toJSDate(raw.updatedAt) ?? toJSDate(raw.createdAt);
+  const createdAt = toJSDate(raw.createdAt);
+  const source = typeof raw.source === 'string' && raw.source.trim().length > 0 ? raw.source.trim() : null;
+  const slug = typeof raw.slug === 'string' && raw.slug.trim().length > 0 ? raw.slug.trim() : null;
+
+  return {
+    id: raw.id ?? null,
+    title,
+    lead,
+    bodyParagraphs,
+    imageUrl,
+    tags,
+    publishedAt,
+    createdAt,
+    source,
+    slug,
+  };
+};
+
+const NewsDetailPage = ({ sectionPath = null }) => {
+  const { slug } = useParams();
+  const [status, setStatus] = useState(DETAIL_STATUS.loading);
+  const [article, setArticle] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [slug]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchArticle = async () => {
+      if (!slug) {
+        if (!isMounted) return;
+        setArticle(null);
+        setStatus(DETAIL_STATUS.notFound);
+        return;
+      }
+
+      if (isMounted) {
+        setStatus(DETAIL_STATUS.loading);
+        setError(null);
+      }
+
+      try {
+        const rawArticle = await getNewsBySlug(slug);
+        if (!isMounted) return;
+
+        if (!rawArticle) {
+          setArticle(null);
+          setStatus(DETAIL_STATUS.notFound);
+          return;
+        }
+
+        const normalized = normalizeNewsArticle(rawArticle);
+        setArticle(normalized);
+        setStatus(DETAIL_STATUS.ready);
+      } catch (loadError) {
+        if (!isMounted) return;
+        setError(loadError);
+        setStatus(DETAIL_STATUS.error);
+      }
+    };
+
+    fetchArticle();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
+
+  const fallbackSectionLabel =
+    sectionPath && typeof NAVIGATION_TAGS[sectionPath] === 'string' ? NAVIGATION_TAGS[sectionPath] : null;
+  const fallbackBackHref = sectionPath ?? '/';
+  const fallbackBackLabel = fallbackSectionLabel ? `Volver a ${fallbackSectionLabel}` : 'Volver al inicio';
+
+  if (status !== DETAIL_STATUS.ready || !article) {
+    const isLoading = status === DETAIL_STATUS.loading;
+    const isNotFound = status === DETAIL_STATUS.notFound;
+
+    return (
+      <section className="inner-page news-detail" aria-labelledby="news-detail-title">
+        <div className="inner-page__hero inner-page__hero--article">
+          <h1 id="news-detail-title">
+            {isLoading ? 'Cargando noticia…' : isNotFound ? 'Noticia no encontrada' : 'No pudimos cargar la noticia'}
+          </h1>
+          <p>
+            {isLoading
+              ? 'Estamos recuperando la información de esta noticia.'
+              : isNotFound
+              ? 'Revisa que la dirección sea correcta o vuelve a la sección correspondiente.'
+              : 'Revisa tu conexión o vuelve a intentarlo más tarde.'}
+          </p>
+        </div>
+        <div className="inner-page__content">
+          {status === DETAIL_STATUS.error && error?.message ? (
+            <p className="news-detail__status" role="alert">
+              {error.message}
+            </p>
+          ) : null}
+          <div className="news-feature__actions">
+            <Link to={fallbackBackHref} className="news-feature__back">
+              ← {fallbackBackLabel}
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const primaryTag = resolvePrimaryTag(article.tags);
+  const sectionLabel = primaryTag?.label ?? fallbackSectionLabel ?? 'Noticias';
+  const sectionHref = primaryTag?.path ?? fallbackBackHref;
+  const backLabel = primaryTag?.label && primaryTag.path ? `Volver a ${primaryTag.label}` : fallbackBackLabel;
+  const publishedDate = article.publishedAt ? ARTICLE_DATE_FORMATTER.format(article.publishedAt) : null;
+  const hasBody = Array.isArray(article.bodyParagraphs) && article.bodyParagraphs.length > 0;
+  const fallbackParagraph = article.lead || 'Pronto añadiremos más detalles de esta noticia.';
+
+  return (
+    <section className="inner-page news-detail" aria-labelledby="news-detail-title">
+      <div className="inner-page__hero inner-page__hero--article">
+        <span className="title-badge">{sectionLabel}</span>
+        <h1 id="news-detail-title">{article.title}</h1>
+        {article.lead ? <p>{article.lead}</p> : null}
+      </div>
+
+      <div className="inner-page__content">
+        <article className="news-feature news-feature--detail" aria-label={`Detalle de ${article.title}`}>
+          <div className="news-feature__grid">
+            <figure className="news-feature__photo">
+              <img src={article.imageUrl} alt={article.title} />
+            </figure>
+            <header className="news-feature__headline">
+              <h2 className="sr-only">Metadatos de la noticia</h2>
+              <ul className="news-feature__meta">
+                {sectionLabel ? <li>Sección: {sectionLabel}</li> : null}
+                {publishedDate ? <li>Fecha: {publishedDate}</li> : null}
+                {article.source ? <li>Fuente: {article.source}</li> : null}
+              </ul>
+            </header>
+            <div className="news-feature__content">
+              {hasBody
+                ? article.bodyParagraphs.map((paragraph, index) => (
+                    <p key={`paragraph-${index}`}>{paragraph}</p>
+                  ))
+                : <p>{fallbackParagraph}</p>}
+            </div>
+          </div>
+        </article>
+
+        <div className="news-feature__actions">
+          <Link to={sectionHref} className="news-feature__back">
+            ← {backLabel}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const RECENT_VIDEOS_TAG = 'Videos recientes';
 const MAX_HOME_VIDEOS = 10;
@@ -749,6 +980,228 @@ const truncateText = (text, maxLength = 180) => {
   if (trimmed.length <= maxLength) return trimmed;
   return `${trimmed.slice(0, maxLength - 1).trimEnd()}…`;
 };
+
+const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => {
+  const { items, status, error } = useNews({ tag, limit: SECTION_NEWS_LIMIT });
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
+  const normalizedItems = useMemo(() => {
+    if (!Array.isArray(items)) return [];
+
+    return items.map((article, index) => {
+      const titleText =
+        typeof article.title === 'string' && article.title.trim().length > 0
+          ? article.title.trim()
+          : 'Noticia sin título';
+      const leadText = typeof article.lead === 'string' ? article.lead.trim() : '';
+      const bodyText = typeof article.body === 'string' ? article.body.trim() : '';
+      const excerptSource = leadText.length > 0 ? leadText : bodyText;
+      const excerpt = truncateText(
+        excerptSource.length > 0 ? excerptSource : 'Pronto añadiremos más detalles de esta noticia.'
+      );
+      const imageUrl =
+        typeof article.imageUrl === 'string' && article.imageUrl.trim().length > 0
+          ? article.imageUrl.trim()
+          : FALLBACK_NEWS_IMAGE;
+      const slug = typeof article.slug === 'string' && article.slug.trim().length > 0 ? article.slug.trim() : null;
+
+      const preferredPath = getPreferredPathForTags(article.tags);
+      const detailHref = slug && preferredPath ? `${preferredPath}/${slug}` : slug ? `/noticias/${slug}` : null;
+
+      return {
+        id: article.id ?? `section-article-${index}`,
+        title: titleText,
+        excerpt,
+        imageUrl,
+        detailHref,
+      };
+    });
+  }, [items]);
+
+  const heroClassName = heroVariant.length > 0 ? `inner-page__hero ${heroVariant}` : 'inner-page__hero';
+
+  return (
+    <section className="inner-page" aria-labelledby={headingId}>
+      <div className={heroClassName}>
+        <h1 id={headingId}>{title}</h1>
+        <p>{intro}</p>
+      </div>
+
+      <div className="inner-page__content">
+        {status === NEWS_STATUS.loading ? (
+          <p role="status">Cargando noticias…</p>
+        ) : status === NEWS_STATUS.error ? (
+          <div role="alert">
+            <p>No pudimos cargar las noticias de esta sección.</p>
+            {error?.message ? <p>{error.message}</p> : null}
+          </div>
+        ) : normalizedItems.length === 0 ? (
+          <p role="note">Aún no hay noticias registradas para esta sección.</p>
+        ) : (
+          <div className="written__grid">
+            {normalizedItems.map((article) => (
+              <article key={article.id} className="written-card written-card--compact">
+                <div className="written-card__image">
+                  <img src={article.imageUrl} alt={article.title} loading="lazy" />
+                </div>
+                <div className="written-card__content">
+                  <h3>{article.title}</h3>
+                  <p>{article.excerpt}</p>
+                  {article.detailHref ? (
+                    <Link
+                      to={article.detailHref}
+                      className="written-card__cta"
+                      aria-label={`Leer más sobre ${article.title}`}
+                    >
+                      Leer más
+                    </Link>
+                  ) : (
+                    <span className="written-card__cta" aria-disabled="true">
+                      Leer más
+                    </span>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
+const AcuiculturaPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/acuicultura'] ?? 'Acuicultura'}
+    heroVariant="inner-page__hero--acuicultura"
+    title="Acuicultura"
+    intro="Reportes, innovación y políticas públicas que marcan la agenda de la industria acuícola."
+    headingId="acuicultura-title"
+  />
+);
+
+const SalmoniculturaPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/acuicultura/salmonicultura']}
+    heroVariant="inner-page__hero--acuicultura"
+    title="Salmonicultura"
+    intro="Producción, sostenibilidad y proyecciones de la industria del salmón."
+    headingId="salmonicultura-title"
+  />
+);
+
+const MitiliculturaPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/acuicultura/mitilicultura']}
+    heroVariant="inner-page__hero--acuicultura"
+    title="Mitilicultura"
+    intro="Noticias sobre el cultivo y la agregación de valor de los choritos."
+    headingId="mitilicultura-title"
+  />
+);
+
+const LecheriaPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/lecheria']}
+    heroVariant="inner-page__hero--negocios"
+    title="Lechería"
+    intro="Cobertura integral de la cadena láctea, sus cooperativas y tecnologías."
+    headingId="lecheria-title"
+  />
+);
+
+const TurismoPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/turismo']}
+    heroVariant="inner-page__hero--turismo"
+    title="Turismo"
+    intro="Estrategias, experiencias y políticas que fortalecen la oferta turística del sur de Chile."
+    headingId="turismo-title"
+  />
+);
+
+const TurismoOperadoresPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/turismo/operadores']}
+    heroVariant="inner-page__hero--turismo"
+    title="Operadores turísticos"
+    intro="Actualidad y buenas prácticas de agencias y guías especializados."
+    headingId="turismo-operadores-title"
+  />
+);
+
+const TurismoHoteleriaPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/turismo/hoteleria-gastronomia']}
+    heroVariant="inner-page__hero--turismo"
+    title="Hotelería y gastronomía"
+    intro="Tendencias culinarias y de hospitalidad que potencian el turismo del sur."
+    headingId="turismo-hoteleria-title"
+  />
+);
+
+const TurismoOfertaPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/turismo/oferta']}
+    heroVariant="inner-page__hero--turismo"
+    title="Oferta turística"
+    intro="Rutas, panoramas y experiencias que posicionan a la macrozona sur."
+    headingId="turismo-oferta-title"
+  />
+);
+
+const EconomiaPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/economia-desarrollo']}
+    heroVariant="inner-page__hero--negocios"
+    title="Economía y desarrollo"
+    intro="Inversiones, políticas públicas y proyectos estratégicos para la región."
+    headingId="economia-title"
+  />
+);
+
+const EconomiaIDPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/economia-desarrollo/id']}
+    heroVariant="inner-page__hero--negocios"
+    title="I+D"
+    intro="Innovación, ciencia aplicada y transferencia tecnológica desde el sur."
+    headingId="economia-id-title"
+  />
+);
+
+const EconomiaTecnologiaPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/economia-desarrollo/tecnologia']}
+    heroVariant="inner-page__hero--negocios"
+    title="Tecnología"
+    intro="Digitalización, automatización y soluciones inteligentes para la industria."
+    headingId="economia-tecnologia-title"
+  />
+);
+
+const EconomiaServiciosPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/economia-desarrollo/servicios']}
+    heroVariant="inner-page__hero--negocios"
+    title="Servicios"
+    intro="Proveedores y plataformas que acompañan el crecimiento empresarial."
+    headingId="economia-servicios-title"
+  />
+);
+
+const PymesPage = () => (
+  <SectionNewsPage
+    tag={NAVIGATION_TAGS['/pymes']}
+    heroVariant="inner-page__hero--negocios"
+    title="PyME's"
+    intro="Historias de emprendimiento, financiamiento y escalamiento en la macrozona sur."
+    headingId="pymes-title"
+  />
+);
 
 const WrittenHighlights = () => {
   const { items, status, error } = useNews({ tag: OTHER_NEWS_TAG, limit: OTHER_NEWS_LIMIT });
@@ -1202,301 +1655,6 @@ const HomePage = () => (
   </>
 );
 
-const SalmoniculturaPage = () => (
-  <section className="inner-page" aria-labelledby="salmonicultura-title">
-    <div className="inner-page__hero inner-page__hero--acuicultura">
-      <h1 id="salmonicultura-title">Salmonicultura</h1>
-      <p>
-        Reportes y entrevistas sobre producción de salmón, innovación en cultivo offshore, regulaciones y sostenibilidad
-        ambiental en el sur de Chile.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Últimas notas</h2>
-        <p>
-          Muy pronto publicaremos artículos destacados, fichas técnicas y material audiovisual con el que podrás seguir la
-          actualidad del sector.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const MitiliculturaPage = () => (
-  <section className="inner-page" aria-labelledby="mitilicultura-title">
-    <div className="inner-page__hero inner-page__hero--acuicultura">
-      <h1 id="mitilicultura-title">Mitilicultura</h1>
-      <p>
-        Cobertura de la industria de los choritos: exportaciones, certificaciones, proyectos asociativos y desarrollo
-        territorial en Chiloé y Aysén.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Agenda editorial</h2>
-        <p>
-          Estamos recopilando historias de productores, casos de innovación logística y oportunidades de inversión que
-          estarán disponibles en esta sección.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const LecheriaPage = () => (
-  <section className="inner-page" aria-labelledby="lecheria-title">
-    <div className="inner-page__hero inner-page__hero--negocios">
-      <h1 id="lecheria-title">Lechería</h1>
-      <p>
-        Historias, tendencias y reportes de la cadena láctea: productividad, bienestar animal, procesamiento y nuevos
-        mercados.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Próximamente</h2>
-        <p>
-          Aquí encontrarás entrevistas a cooperativas, análisis de precios y soluciones tecnológicas que impactan al
-          sector.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const TurismoOperadoresPage = () => (
-  <section className="inner-page" aria-labelledby="turismo-operadores-title">
-    <div className="inner-page__hero inner-page__hero--turismo">
-      <h1 id="turismo-operadores-title">Operadores turísticos</h1>
-      <p>
-        Novedades de agencias, tour operadores y experiencias guiadas que impulsan el desarrollo turístico sustentable en
-        el sur austral.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Historias en construcción</h2>
-        <p>
-          Estamos preparando un directorio interactivo y casos de éxito de operadores locales para ayudar a conectar la
-          oferta con nuevos visitantes.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const TurismoHoteleriaPage = () => (
-  <section className="inner-page" aria-labelledby="turismo-hoteleria-title">
-    <div className="inner-page__hero inner-page__hero--turismo">
-      <h1 id="turismo-hoteleria-title">Hotelería y gastronomía</h1>
-      <p>
-        Cobertura de alojamientos, restaurantes, innovación culinaria y capacitación de capital humano para fortalecer la
-        identidad gastronómica de la macrozona sur.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Guías de referencia</h2>
-        <p>
-          Próximamente publicaremos rankings, reseñas y notas multimedia con chefs, hoteleros y emprendimientos locales.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const TurismoOfertaPage = () => (
-  <section className="inner-page" aria-labelledby="turismo-oferta-title">
-    <div className="inner-page__hero inner-page__hero--turismo">
-      <h1 id="turismo-oferta-title">Oferta turística</h1>
-      <p>
-        Agenda de panoramas, rutas y productos turísticos innovadores que ofrece la Patagonia y el sur de Chile durante
-        todo el año.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Próximos lanzamientos</h2>
-        <p>
-          Estamos organizando un catálogo de experiencias y alianzas con municipios para impulsar el turismo territorial.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const PymesPage = () => (
-  <section className="inner-page" aria-labelledby="pymes-title">
-    <div className="inner-page__hero inner-page__hero--negocios">
-      <h1 id="pymes-title">PyME's</h1>
-      <p>
-        Reportajes, herramientas y casos de innovación aplicada al desarrollo de pequeñas y medianas empresas del sur de
-        Chile.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Contenido en preparación</h2>
-        <p>
-          Próximamente encontrarás guías de financiamiento, historias de emprendimiento regional y directorios de apoyo
-          para PyME's.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const EconomiaPage = () => (
-  <section className="inner-page" aria-labelledby="economia-title">
-    <div className="inner-page__hero inner-page__hero--negocios">
-      <h1 id="economia-title">Economía y desarrollo</h1>
-      <p>
-        Análisis macro y microeconómicos, políticas públicas y proyectos estratégicos que impactan al crecimiento regional
-        del sur de Chile.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Notas en preparación</h2>
-        <p>
-          Pronto compartiremos informes de inversión, financiamiento para pymes y entrevistas con líderes empresariales y
-          académicos.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const EconomiaIDPage = () => {
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, []);
-
-  return (
-  <section className="inner-page" aria-labelledby="economia-id-title">
-    <h1 id="economia-id-title" className="sr-only">
-      I+D destacado
-    </h1>
-
-    <article className="news-feature news-feature--id" aria-label="StartupLab Los Lagos">
-      <div className="news-feature__grid">
-        <figure className="news-feature__photo">
-          <img src="/imagenes/economia/startup-lab-01.jpg" alt="Equipo de StartupLab Los Lagos en Puerto Varas" />
-        </figure>
-
-        <header className="news-feature__headline">
-          <h2>Puerto Varas se consolida como polo biotecnológico del sur con nuevo StartupLab Los Lagos</h2>
-          <ul className="news-feature__meta">
-            <li>Sección: Economía y desarrollo / I+D</li>
-            <li>Fecha: 30 de octubre de 2025</li>
-            <li>Fuente: Depto. de Comunicaciones de Corfo Los Lagos</li>
-          </ul>
-        </header>
-
-        <div className="news-feature__content">
-          <p className="news-feature__lead">
-            <strong>
-              Corfo aprobó el proyecto StartupLab Los Lagos, liderado por Patagonia Biotech HUB y con base en Puerto Varas, que
-              busca posicionar a la región como referente nacional en biotecnología aplicada y desarrollo sostenible. La
-              iniciativa contempla una inversión de US$ 4,3 millones y reúne a empresas, instituciones públicas y actores del
-              ecosistema científico-tecnológico.
-            </strong>
-          </p>
-          <p>
-            En el marco de su estrategia de descentralización de la innovación, Corfo aprobó el proyecto StartupLab Los Lagos,
-            que será implementado por Patagonia Biotech HUB, encabezado por KuraBiotech. El nuevo centro tendrá su sede en
-            Puerto Varas, donde se construirá un espacio de 1.000 m², con laboratorios especializados y áreas colaborativas
-            orientadas al desarrollo biotecnológico.
-          </p>
-          <p>
-            El StartupLab impulsará la innovación en sectores como acuicultura, agroindustria, silvicultura, energías limpias y
-            biomedicina animal, con alcance en red hacia las regiones de La Araucanía, Los Ríos, Aysén y Magallanes.
-          </p>
-          <p>
-            El proyecto cuenta con un presupuesto total de US$ 4,3 millones, de los cuales US$ 2,5 millones provienen de Corfo y
-            US$ 1,8 millones del sector privado, con la participación de KuraBiotech, Veterquímica, Multi X, Genera4,
-            Acuanativa, y el apoyo de instituciones como la Municipalidad de Puerto Varas, Sofofa Hub, Endeavor y BancoEstado.
-          </p>
-          <p>
-            El seremi de Economía de Los Lagos, Luis Cárdenas, calificó la iniciativa como “un día histórico para la región”,
-            destacando su aporte a la diversificación productiva y la economía del conocimiento. En tanto, el director regional
-            de Corfo, Eduardo Arancibia, señaló que el StartupLab “posiciona a Los Lagos como un polo de biotecnología aplicada
-            al desarrollo sostenible, con una mirada hacia el mundo”.
-          </p>
-          <p>
-            El alcalde de Puerto Varas, Tomás Gárate, resaltó que el proyecto “consolidará a la ciudad como un referente en
-            investigación aplicada e innovación con impacto territorial”, mientras que el CEO de KuraBiotech, Eduardo Wallach,
-            subrayó que “Puerto Varas ya no es una promesa, sino un epicentro real del emprendimiento y la biotecnología en
-            Chile”.
-          </p>
-          <p>
-            Con esta aprobación, Corfo fortalece su red nacional de hubs de innovación, promoviendo el desarrollo tecnológico
-            desde las regiones hacia todo el país.
-          </p>
-        </div>
-
-        <aside className="news-feature__aside" aria-label="Otras noticias de I+D">
-          <h3>Otras noticias</h3>
-          <ul>
-            <li>Startups acuícolas de Los Lagos aceleran transferencia tecnológica con apoyo de Endeavor.</li>
-            <li>Universidad Austral inaugura centro de prototipado para bioeconomía circular.</li>
-            <li>Hub de innovación energética lanza convocatoria para proyectos de hidrógeno verde.</li>
-            <li>Laboratorio regional desarrolla biosensores para monitoreo de ecosistemas lacustres.</li>
-          </ul>
-        </aside>
-      </div>
-    </article>
-
-    <div className="news-feature__actions">
-      <Link to="/" className="news-feature__back">
-        Volver al inicio
-      </Link>
-    </div>
-  </section>
-  );
-};
-
-const EconomiaTecnologiaPage = () => (
-  <section className="inner-page" aria-labelledby="economia-tecnologia-title">
-    <div className="inner-page__hero inner-page__hero--negocios">
-      <h1 id="economia-tecnologia-title">Tecnología</h1>
-      <p>
-        Transformación digital, automatización y soluciones inteligentes que modernizan la gestión empresarial en el sur del
-        país.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Reportes en preparación</h2>
-        <p>
-          Pronto publicaremos notas sobre software, hardware y servicios tecnológicos adoptados por empresas regionales para
-          mejorar su productividad.
-        </p>
-      </article>
-    </div>
-  </section>
-);
-
-const EconomiaServiciosPage = () => (
-  <section className="inner-page" aria-labelledby="economia-servicios-title">
-    <div className="inner-page__hero inner-page__hero--negocios">
-      <h1 id="economia-servicios-title">Servicios</h1>
-      <p>
-        Plataformas y proveedores especializados que acompañan el crecimiento de las pymes y grandes empresas del sur.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>Sección en construcción</h2>
-        <p>
-          En breve incluiremos guías y directorios de servicios financieros, logísticos, profesionales y de consultoría para
-          apoyar la gestión empresarial.
-        </p>
-      </article>
-    </div>
-  </section>
-);
 
 const NosotrosPage = () => (
   <section className="inner-page" aria-labelledby="nosotros-title">
@@ -1588,22 +1746,54 @@ function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
+        <Route path="acuicultura" element={<AcuiculturaPage />} />
         <Route path="acuicultura/salmonicultura" element={<SalmoniculturaPage />} />
+        <Route
+          path="acuicultura/salmonicultura/:slug"
+          element={<NewsDetailPage sectionPath="/acuicultura/salmonicultura" />}
+        />
         <Route path="acuicultura/mitilicultura" element={<MitiliculturaPage />} />
+        <Route
+          path="acuicultura/mitilicultura/:slug"
+          element={<NewsDetailPage sectionPath="/acuicultura/mitilicultura" />}
+        />
+        <Route path="acuicultura/:slug" element={<NewsDetailPage sectionPath="/acuicultura" />} />
         <Route path="lecheria" element={<LecheriaPage />} />
+        <Route path="lecheria/:slug" element={<NewsDetailPage sectionPath="/lecheria" />} />
+        <Route path="turismo" element={<TurismoPage />} />
         <Route path="turismo/operadores" element={<TurismoOperadoresPage />} />
+        <Route path="turismo/operadores/:slug" element={<NewsDetailPage sectionPath="/turismo/operadores" />} />
         <Route path="turismo/hoteleria-gastronomia" element={<TurismoHoteleriaPage />} />
+        <Route
+          path="turismo/hoteleria-gastronomia/:slug"
+          element={<NewsDetailPage sectionPath="/turismo/hoteleria-gastronomia" />}
+        />
         <Route path="turismo/oferta" element={<TurismoOfertaPage />} />
+        <Route path="turismo/oferta/:slug" element={<NewsDetailPage sectionPath="/turismo/oferta" />} />
+        <Route path="turismo/:slug" element={<NewsDetailPage sectionPath="/turismo" />} />
         <Route path="nosotros" element={<NosotrosPage />} />
         <Route path="pymes" element={<PymesPage />} />
+        <Route path="pymes/:slug" element={<NewsDetailPage sectionPath="/pymes" />} />
         <Route path="economia-desarrollo" element={<EconomiaPage />} />
         <Route path="economia-desarrollo/id" element={<EconomiaIDPage />} />
+        <Route path="economia-desarrollo/id/:slug" element={<NewsDetailPage sectionPath="/economia-desarrollo/id" />} />
         <Route path="economia-desarrollo/marka-e" element={<MarkaELaunchPage />} />
+        <Route path="economia-desarrollo/marka-e/:slug" element={<NewsDetailPage sectionPath="/economia-desarrollo/marka-e" />} />
         <Route path="economia-desarrollo/tecnologia" element={<EconomiaTecnologiaPage />} />
+        <Route
+          path="economia-desarrollo/tecnologia/:slug"
+          element={<NewsDetailPage sectionPath="/economia-desarrollo/tecnologia" />}
+        />
         <Route path="economia-desarrollo/servicios" element={<EconomiaServiciosPage />} />
+        <Route
+          path="economia-desarrollo/servicios/:slug"
+          element={<NewsDetailPage sectionPath="/economia-desarrollo/servicios" />}
+        />
+        <Route path="economia-desarrollo/:slug" element={<NewsDetailPage sectionPath="/economia-desarrollo" />} />
         <Route path="contacto" element={<ContactoPage />} />
         <Route path="auth" element={<AuthPage />} />
       </Route>
+      <Route path="noticias/:slug" element={<NewsDetailPage />} />
       <Route path="admin/login" element={<AdminLoginPage />} />
       <Route path="admin" element={<ProtectedRoute />}>
         <Route index element={<AdminDashboard />} />
