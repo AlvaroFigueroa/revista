@@ -11,9 +11,10 @@ export const VIDEOS_STATUS = Object.freeze({
   error: 'error'
 });
 
-const ensurePositiveInt = (value, fallback) => {
+const normalizeLimit = (value) => {
+  if (value === null || value === undefined) return null;
   if (Number.isInteger(value) && value > 0) return value;
-  return fallback;
+  return DEFAULT_LIMIT;
 };
 
 export function useVideos({ tag, limit = DEFAULT_LIMIT } = {}) {
@@ -48,7 +49,7 @@ export function useVideos({ tag, limit = DEFAULT_LIMIT } = {}) {
     return base;
   };
 
-  const effectiveLimit = useMemo(() => ensurePositiveInt(limit, DEFAULT_LIMIT), [limit]);
+  const effectiveLimit = useMemo(() => normalizeLimit(limit), [limit]);
   const normalizedTag = useMemo(() => (typeof tag === 'string' ? tag.trim() : ''), [tag]);
 
   useEffect(() => {

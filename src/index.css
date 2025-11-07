@@ -1157,6 +1157,17 @@ main {
   gap: 0.35rem;
 }
 
+.hero__highlight-content p,
+.hero__highlight-content--compact p {
+  margin: 0;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .hero__highlight-title {
   color: #0f172a;
   font-weight: 600;

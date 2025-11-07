@@ -387,7 +387,7 @@ const Header = () => {
         <div className="header__social" aria-label="Redes sociales">
           <a
             className="header__social-link header__social-link--instagram"
-            href="https://www.instagram.com/marka_e"
+            href="https://www.instagram.com/markae_md/"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -416,6 +416,17 @@ const Header = () => {
             <span className="sr-only">X (antes Twitter)</span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 3.5h3.2l5.2 6.6 4.8-6.6H20l-6.2 8.3L20 20.5h-3.2l-5.4-7-5 7H4l6.3-8.7z" />
+            </svg>
+          </a>
+          <a
+            className="header__social-link header__social-link--youtube"
+            href="https://www.youtube.com/@Markae_MD"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="sr-only">YouTube</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21.58 7.2a2.51 2.51 0 0 0-1.77-1.78C18.35 5 12 5 12 5s-6.35 0-7.81.42A2.51 2.51 0 0 0 2.42 7.2 26.26 26.26 0 0 0 2 12a26.26 26.26 0 0 0 .42 4.8 2.51 2.51 0 0 0 1.77 1.78C5.65 19 12 19 12 19s6.35 0 7.81-.42a2.51 2.51 0 0 0 1.77-1.78A26.26 26.26 0 0 0 22 12a26.26 26.26 0 0 0-.42-4.8zM10 15.5v-7l6 3.5-6 3.5z" />
             </svg>
           </a>
         </div>
@@ -759,7 +770,6 @@ const Hero = () => {
 const OTHER_NEWS_TAG = 'Otras noticias y comunicados de prensa';
 const OTHER_NEWS_LIMIT = 10;
 const SECTION_NEWS_LIMIT = 10;
-const SECTION_VIDEOS_LIMIT = 6;
 const FALLBACK_NEWS_IMAGE = 'https://placehold.co/640x360?text=Noticia';
 
 const DETAIL_STATUS = Object.freeze({
@@ -1062,7 +1072,7 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
     items: videoItems,
     status: videosStatus,
     error: videosError,
-  } = useVideos({ tag, limit: SECTION_VIDEOS_LIMIT });
+  } = useVideos({ tag, limit: null });
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -1127,8 +1137,7 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
           title: titleText,
           embedUrl,
         };
-      })
-      .slice(0, SECTION_VIDEOS_LIMIT);
+      });
   }, [videoItems]);
 
   const videosMessage = (() => {
