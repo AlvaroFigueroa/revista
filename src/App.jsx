@@ -652,13 +652,6 @@ const Hero = () => {
               </span>
               {titleSub ? <span className="hero__feature-title-sub">{titleSub}</span> : null}
             </h2>
-            <Link
-              to="/economia-desarrollo/marka-e"
-              className="hero__feature-cta"
-              aria-label="Leer más sobre el lanzamiento de la plataforma Marka-E"
-            >
-              Leer más → →
-            </Link>
           </div>
           <div className="hero__media" aria-label="Video destacado">
             <div className="hero__video">
@@ -766,6 +759,7 @@ const Hero = () => {
 const OTHER_NEWS_TAG = 'Otras noticias y comunicados de prensa';
 const OTHER_NEWS_LIMIT = 10;
 const SECTION_NEWS_LIMIT = 10;
+const SECTION_VIDEOS_LIMIT = 6;
 const FALLBACK_NEWS_IMAGE = 'https://placehold.co/640x360?text=Noticia';
 
 const DETAIL_STATUS = Object.freeze({
@@ -1064,6 +1058,11 @@ const truncateText = (text, maxLength = 180) => {
 
 const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => {
   const { items, status, error } = useNews({ tag, limit: SECTION_NEWS_LIMIT });
+  const {
+    items: videoItems,
+    status: videosStatus,
+    error: videosError,
+  } = useVideos({ tag, limit: SECTION_VIDEOS_LIMIT });
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -1101,6 +1100,49 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
       };
     });
   }, [items]);
+
+  const normalizedVideos = useMemo(() => {
+    if (!Array.isArray(videoItems) || videoItems.length === 0) return [];
+
+    const seen = new Set();
+
+    return videoItems
+      .filter((video) => {
+        const embedUrl = typeof video.embedUrl === 'string' ? video.embedUrl.trim() : '';
+        const uniqueKey = embedUrl.length > 0 ? embedUrl : video.id ?? '';
+        if (!uniqueKey) return false;
+        if (seen.has(uniqueKey)) return false;
+        seen.add(uniqueKey);
+        return true;
+      })
+      .map((video, index) => {
+        const titleText =
+          typeof video.title === 'string' && video.title.trim().length > 0
+            ? video.title.trim()
+            : 'Video sin título';
+        const embedUrl = typeof video.embedUrl === 'string' ? video.embedUrl.trim() : '';
+
+        return {
+          id: video.id ?? `section-video-${index}`,
+          title: titleText,
+          embedUrl,
+        };
+      })
+      .slice(0, SECTION_VIDEOS_LIMIT);
+  }, [videoItems]);
+
+  const videosMessage = (() => {
+    if (videosStatus === VIDEOS_STATUS.error) {
+      return videosError?.message || 'No pudimos cargar los videos de esta sección.';
+    }
+    if (videosStatus === VIDEOS_STATUS.loading) {
+      return 'Cargando videos de esta sección…';
+    }
+    if (normalizedVideos.length === 0) {
+      return 'Aún no hay videos asociados a esta sección.';
+    }
+    return null;
+  })();
 
   const heroClassName = heroVariant.length > 0 ? `inner-page__hero ${heroVariant}` : 'inner-page__hero';
 
@@ -1149,6 +1191,48 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
             ))}
           </div>
         )}
+
+        {tag ? (
+          <section className="inner-page__videos" aria-label={`Videos de ${title}`}>
+            <header className="section-heading">
+              <h2>
+                <span className="title-badge">Videos</span> {title}
+              </h2>
+            </header>
+
+            {videosMessage ? (
+              <p
+                className={`videos__status videos__status--${
+                  videosStatus === VIDEOS_STATUS.error
+                    ? 'error'
+                    : videosStatus === VIDEOS_STATUS.loading
+                    ? 'loading'
+                    : 'note'
+                }`}
+                role={videosStatus === VIDEOS_STATUS.error ? 'alert' : videosStatus === VIDEOS_STATUS.loading ? 'status' : 'note'}
+              >
+                {videosMessage}
+              </p>
+            ) : (
+              <div className="videos__grid" role="list">
+                {normalizedVideos.map((video) => (
+                  <article key={video.id} className="video-card" role="listitem">
+                    <div className="video-card__player">
+                      <iframe
+                        src={video.embedUrl}
+                        title={video.title}
+                        frameBorder="0"
+                        allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                    <div className="video-card__meta">{video.title}</div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null}
       </div>
     </section>
   );

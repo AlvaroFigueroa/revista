@@ -169,6 +169,25 @@ export const upsertFeaturedVideo = async ({ title, embedUrl, tags }) => {
   );
 };
 
+export const createVideoHistoryEntry = async ({ title, embedUrl, tags }) => {
+  const trimmedTitle = typeof title === 'string' ? title.trim() : '';
+  const validEmbedUrl = sanitizeEmbedUrl(embedUrl);
+  const normalizedTags = normalizeTags(tags);
+
+  if (!trimmedTitle || !validEmbedUrl || normalizedTags.length === 0) {
+    throw new Error('No se pudo registrar el historial del video por falta de datos.');
+  }
+
+  return addDoc(videosCollectionRef, {
+    title: trimmedTitle,
+    embedUrl: validEmbedUrl,
+    tags: normalizedTags,
+    isFeaturedHistory: true,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+};
+
 export const subscribeToVideos = ({ tag, limit = 10, onNext, onError }) => {
   if (typeof onNext !== 'function') {
     throw new Error('Debes proporcionar un callback onNext.');

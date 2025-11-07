@@ -13,3 +13,15 @@ export const HOME_SECTION_TITLES = Object.freeze([
   'Nosotros',
   'Contacto'
 ]);
+
+export const EXCLUDED_EDITOR_TAGS = Object.freeze([
+  'Inicio',
+  'Noticia destacada',
+  'Newsletter',
+  'Eventos',
+  'Acuicultura',
+  'Turismo',
+  'Economía y desarrollo',
+  'Nosotros',
+  'Contacto'
+]);

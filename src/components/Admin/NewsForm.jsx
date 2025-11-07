@@ -1,12 +1,9 @@
 import { NAVIGATION_TAGS } from '../../constants/navigationTags';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { HOME_SECTION_TITLES } from '../../constants/homeSections';
+import { HOME_SECTION_TITLES, EXCLUDED_EDITOR_TAGS } from '../../constants/homeSections';
 import { uploadNewsImage, UploadError } from '../../services/uploads';
 
-const MIN_TITLE_LENGTH = 10;
-const MIN_LEAD_LENGTH = 40;
-const MIN_BODY_LENGTH = 120;
 const ARTICLE_ID_MIN_LENGTH = 6;
 
 const toInputDate = (value) => {
@@ -70,10 +67,11 @@ const NewsForm = ({
   const [imagePreview, setImagePreview] = useState(() => defaultValues?.imageUrl ?? '');
   const [localError, setLocalError] = useState(null);
   const fileInputRef = useRef(null);
-  const combinedTags = useMemo(
-    () => Array.from(new Set([...HOME_SECTION_TITLES, ...Object.values(NAVIGATION_TAGS)])),
-    []
-  );
+  const excludedTagsSet = useMemo(() => new Set(EXCLUDED_EDITOR_TAGS), []);
+  const combinedTags = useMemo(() => {
+    const raw = [...HOME_SECTION_TITLES, ...Object.values(NAVIGATION_TAGS)];
+    return Array.from(new Set(raw.filter((tag) => !excludedTagsSet.has(tag))));
+  }, [excludedTagsSet]);
 
   useEffect(() => {
     setFormData(getInitialState(defaultValues));
@@ -169,9 +167,9 @@ const NewsForm = ({
   const trimmedDate = formData.articleDate.trim();
 
   const isIdValid = trimmedId.length >= ARTICLE_ID_MIN_LENGTH;
-  const isTitleValid = trimmedTitle.length >= MIN_TITLE_LENGTH;
-  const isLeadValid = trimmedLead.length >= MIN_LEAD_LENGTH;
-  const isBodyValid = trimmedBody.length >= MIN_BODY_LENGTH;
+  const isTitleValid = trimmedTitle.length > 0;
+  const isLeadValid = trimmedLead.length > 0;
+  const isBodyValid = trimmedBody.length > 0;
   const areTagsValid = Array.isArray(formData.tags) && formData.tags.length > 0;
   const isDateValid = trimmedDate.length > 0;
   const isImageProvided = Boolean(imageFile || formData.imageUrl.trim());
@@ -263,14 +261,10 @@ const NewsForm = ({
             type="text"
             value={formData.title}
             onChange={handleInputChange}
-            minLength={MIN_TITLE_LENGTH}
-            maxLength={180}
             required
           />
-          <small>{trimmedTitle.length} / 180 caracteres</small>
-          {!isTitleValid ? (
-            <p className="admin-form__hint">El título debe tener al menos {MIN_TITLE_LENGTH} caracteres.</p>
-          ) : null}
+          <small>{`Caracteres: ${trimmedTitle.length}`}</small>
+          {!isTitleValid ? <p className="admin-form__hint">Ingresa un título para la noticia.</p> : null}
         </div>
 
         <div className="admin-form__field">
@@ -280,14 +274,10 @@ const NewsForm = ({
             name="lead"
             value={formData.lead}
             onChange={handleInputChange}
-            minLength={MIN_LEAD_LENGTH}
-            maxLength={400}
             required
           />
-          <small>{trimmedLead.length} / 400 caracteres</small>
-          {!isLeadValid ? (
-            <p className="admin-form__hint">La bajada debe tener al menos {MIN_LEAD_LENGTH} caracteres.</p>
-          ) : null}
+          <small>{`Caracteres: ${trimmedLead.length}`}</small>
+          {!isLeadValid ? <p className="admin-form__hint">La bajada es obligatoria.</p> : null}
         </div>
 
         <div className="admin-form__field">
@@ -297,14 +287,11 @@ const NewsForm = ({
             name="body"
             value={formData.body}
             onChange={handleInputChange}
-            minLength={MIN_BODY_LENGTH}
             rows={10}
             required
           />
-          <small>{trimmedBody.length} caracteres</small>
-          {!isBodyValid ? (
-            <p className="admin-form__hint">El artículo debe tener al menos {MIN_BODY_LENGTH} caracteres.</p>
-          ) : null}
+          <small>{`Caracteres: ${trimmedBody.length}`}</small>
+          {!isBodyValid ? <p className="admin-form__hint">El artículo necesita contenido.</p> : null}
         </div>
 
         <div className="admin-form__field news-form__grid">

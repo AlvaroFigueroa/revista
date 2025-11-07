@@ -1,21 +1,31 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { HOME_SECTION_TITLES } from '../../constants/homeSections';
-import { sanitizeEmbedUrl, normalizeTags, upsertFeaturedVideo } from '../../services/videos';
+import { HOME_SECTION_TITLES, EXCLUDED_EDITOR_TAGS } from '../../constants/homeSections';
+import { NAVIGATION_TAGS } from '../../constants/navigationTags';
+import { sanitizeEmbedUrl, normalizeTags, upsertFeaturedVideo, createVideoHistoryEntry } from '../../services/videos';
 
 const HERO_COLLECTION = 'hero';
 const HERO_DOC_ID = 'featured';
+const HERO_EXCLUDED_TAGS = new Set(EXCLUDED_EDITOR_TAGS);
+const HERO_AVAILABLE_TAGS = Object.freeze(
+  Array.from(
+    new Set(
+      [...HOME_SECTION_TITLES, ...Object.values(NAVIGATION_TAGS)].filter((tag) => !HERO_EXCLUDED_TAGS.has(tag))
+    )
+  )
+);
+const HERO_AVAILABLE_TAGS_SET = new Set(HERO_AVAILABLE_TAGS);
 
 const HeroForm = ({ currentTitle, currentVideoUrl, currentTag, currentTags = [], onSuccess, onError, setFeedback }) => {
   const initialNormalizedTags = useMemo(() => {
-    if (Array.isArray(currentTags) && currentTags.length > 0) {
-      return normalizeTags(currentTags);
-    }
-    if (typeof currentTag === 'string' && currentTag.trim().length > 0) {
-      return normalizeTags([currentTag]);
-    }
-    return [];
+    const sourceTags = Array.isArray(currentTags) && currentTags.length > 0
+      ? currentTags
+      : typeof currentTag === 'string' && currentTag.trim().length > 0
+      ? [currentTag]
+      : [];
+    const normalized = normalizeTags(sourceTags);
+    return normalized.filter((tag) => HERO_AVAILABLE_TAGS_SET.has(tag));
   }, [currentTags, currentTag]);
 
   const [formData, setFormData] = useState(() => ({
@@ -37,7 +47,10 @@ const HeroForm = ({ currentTitle, currentVideoUrl, currentTag, currentTags = [],
   const isTitleValid = formData.title.trim().length >= 10;
   const sanitizedVideoUrl = useMemo(() => sanitizeEmbedUrl(formData.videoUrl), [formData.videoUrl]);
   const isVideoValid = sanitizedVideoUrl.length > 0;
-  const normalizedTags = useMemo(() => normalizeTags(formData.tags), [formData.tags]);
+  const normalizedTags = useMemo(() => {
+    const normalized = normalizeTags(formData.tags);
+    return normalized.filter((tag) => HERO_AVAILABLE_TAGS_SET.has(tag));
+  }, [formData.tags]);
   const isTagValid = normalizedTags.length > 0;
   const initialTagsSignature = useMemo(() => initialNormalizedTags.slice().sort().join('|'), [initialNormalizedTags]);
   const currentTagsSignature = useMemo(() => normalizedTags.slice().sort().join('|'), [normalizedTags]);
@@ -52,9 +65,11 @@ const HeroForm = ({ currentTitle, currentVideoUrl, currentTag, currentTags = [],
   };
 
   const handleTagToggle = (tag) => {
+    if (!HERO_AVAILABLE_TAGS_SET.has(tag)) return;
     setFormData((prev) => {
       const hasTag = prev.tags.includes(tag);
-      const nextTags = hasTag ? prev.tags.filter((value) => value !== tag) : [...prev.tags, tag];
+      const filtered = prev.tags.filter((value) => value !== tag);
+      const nextTags = hasTag ? filtered : [tag, ...filtered];
       return { ...prev, tags: nextTags };
     });
   };
@@ -78,8 +93,16 @@ const HeroForm = ({ currentTitle, currentVideoUrl, currentTag, currentTags = [],
         },
         { merge: true }
       );
+      const trimmedTitle = formData.title.trim();
+
       await upsertFeaturedVideo({
-        title: formData.title.trim(),
+        title: trimmedTitle,
+        embedUrl: sanitizedVideoUrl,
+        tags: normalizedTags
+      });
+
+      await createVideoHistoryEntry({
+        title: trimmedTitle,
         embedUrl: sanitizedVideoUrl,
         tags: normalizedTags
       });
@@ -131,7 +154,7 @@ const HeroForm = ({ currentTitle, currentVideoUrl, currentTag, currentTags = [],
       <div className="admin-form__field">
         <span>Etiquetas vinculadas</span>
         <div className="video-form__tags">
-          {HOME_SECTION_TITLES.map((tag) => {
+          {HERO_AVAILABLE_TAGS.map((tag) => {
             const isActive = formData.tags.includes(tag);
             return (
               <button
