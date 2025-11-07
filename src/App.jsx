@@ -63,6 +63,8 @@ const ARTICLE_DATE_FORMATTER = new Intl.DateTimeFormat('es-CL', {
   day: 'numeric',
 });
 
+const HERO_HIGHLIGHTS_LIMIT = 5;
+
 const FinancialTicker = () => {
   const [indicators, setIndicators] = useState(null);
   const [status, setStatus] = useState('loading');
@@ -574,6 +576,11 @@ const BannerSlot = ({ label, imageSrc, mobileImageSrc, alt, href }) => {
 
 const Hero = () => {
   const { data, status } = useHeroContent();
+  const {
+    items: heroNewsItems,
+    status: heroNewsStatus,
+    error: heroNewsError,
+  } = useNews({ limit: HERO_HIGHLIGHTS_LIMIT });
 
   const heroTitle = useMemo(() => {
     if (typeof data.title === 'string' && data.title.trim().length > 0) {
@@ -604,6 +611,30 @@ const Hero = () => {
     }
     return 'Videos recientes';
   }, [data.tag]);
+
+  const heroHighlights = useMemo(() => {
+    if (!Array.isArray(heroNewsItems)) return [];
+
+    return heroNewsItems.slice(0, HERO_HIGHLIGHTS_LIMIT).map((article, index) => {
+      const title =
+        typeof article.title === 'string' && article.title.trim().length > 0
+          ? article.title.trim()
+          : 'Noticia sin título';
+      const lead = typeof article.lead === 'string' ? article.lead.trim() : '';
+      const body = typeof article.body === 'string' ? article.body.trim() : '';
+      const summary = lead.length > 0 ? lead : body;
+      const slug = typeof article.slug === 'string' && article.slug.trim().length > 0 ? article.slug.trim() : null;
+      const preferredPath = getPreferredPathForTags(article.tags);
+      const href = slug ? (preferredPath ? `${preferredPath}/${slug}` : `/noticias/${slug}`) : null;
+
+      return {
+        id: article.id ?? `hero-highlight-${index}`,
+        title,
+        summary,
+        href,
+      };
+    });
+  }, [heroNewsItems]);
 
   const loading = status === HERO_STATUS.loading;
 
@@ -660,21 +691,71 @@ const Hero = () => {
             aria-label="Otras noticias relevantes"
             data-mobile-visible-count="2"
           >
-            <li>
-              <span>•</span>
-              <div className="hero__highlight-content">
-                <Link to="/economia-desarrollo/id" className="hero__highlight-title">
-                  Puerto Varas se consolida como polo biotecnológico del sur con nuevo StartupLab Los Lagos
-                </Link>
-                <Link to="/economia-desarrollo/id" className="hero__highlight-cta" aria-label="Leer más sobre Puerto Varas se consolida como polo biotecnológico">
-                  Leer más →
-                </Link>
-              </div>
-            </li>
-            <li><span>•</span> Corfo y el Gobierno Regional cofinancian la adopción de tecnologías limpias y capacitación técnica.</li>
-            <li data-mobile-hidden><span>•</span> Productores proyectan replicar la iniciativa en 120 predios antes de finalizar 2025.</li>
-            <li data-mobile-hidden><span>•</span> Gremios lácteos impulsan feria tecnológica itinerante con demostraciones de maquinaria y software agrícola.</li>
-            <li data-mobile-hidden><span>•</span> Los Lagos prepara hub de innovación acuícola para acelerar startups con capital semilla regional.</li>
+            {heroNewsStatus === NEWS_STATUS.loading ? (
+              <li className="hero__highlight hero__highlight--status" role="status">
+                <span>Cargando otras noticias…</span>
+              </li>
+            ) : heroNewsStatus === NEWS_STATUS.error ? (
+              <li className="hero__highlight hero__highlight--status" role="alert">
+                <span>No pudimos cargar otras noticias.</span>
+                {heroNewsError?.message ? <small>{heroNewsError.message}</small> : null}
+              </li>
+            ) : heroHighlights.length === 0 ? (
+              <li className="hero__highlight hero__highlight--status" role="note">
+                <span>Pronto añadiremos más noticias en esta sección.</span>
+              </li>
+            ) : (
+              heroHighlights.map((item, index) => {
+                const mobileHiddenProps = index >= 2 ? { 'data-mobile-hidden': true } : {};
+                if (index === 0) {
+                  return (
+                    <li key={item.id} {...mobileHiddenProps}>
+                      <span>•</span>
+                      <div className="hero__highlight-content">
+                        {item.href ? (
+                          <Link to={item.href} className="hero__highlight-title">
+                            {item.title}
+                          </Link>
+                        ) : (
+                          <span className="hero__highlight-title">{item.title}</span>
+                        )}
+                        {item.summary ? <p>{item.summary}</p> : null}
+                        {item.href ? (
+                          <Link to={item.href} className="hero__highlight-cta" aria-label={`Leer más sobre ${item.title}`}>
+                            Leer más →
+                          </Link>
+                        ) : null}
+                      </div>
+                    </li>
+                  );
+                }
+
+                return (
+                  <li key={item.id} {...mobileHiddenProps}>
+                    <span>•</span>
+                    <div className="hero__highlight-content hero__highlight-content--compact">
+                      {item.href ? (
+                        <Link to={item.href} className="hero__highlight-title">
+                          {item.title}
+                        </Link>
+                      ) : (
+                        <span className="hero__highlight-title">{item.title}</span>
+                      )}
+                      {item.summary ? <p>{item.summary}</p> : null}
+                      {item.href ? (
+                        <Link
+                          to={item.href}
+                          className="hero__highlight-cta hero__highlight-cta--inline"
+                          aria-label={`Leer más sobre ${item.title}`}
+                        >
+                          Leer más →
+                        </Link>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })
+            )}
           </ul>
         </div>
       </div>
