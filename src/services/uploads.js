@@ -50,6 +50,9 @@ export const uploadNewsImage = async (file, articleId) => {
 
   const response = await fetch(NEWS_UPLOAD_ENDPOINT, {
     method: 'POST',
+    headers: {
+      'X-Upload-Token': 'Tmarkae21@21@'
+    },
     body: payload
   });
 
