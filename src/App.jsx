@@ -686,10 +686,6 @@ const Hero = () => {
           <div className="hero__panel-header" aria-hidden="true">
             <span className="title-badge title-badge--compact">Otras noticias</span>
           </div>
-          <p className="hero__highlights-intro">
-            Seleccionamos titulares breves para complementar la cobertura diaria con iniciativas y programas que están
-            marcando la pauta empresarial en el sur de Chile.
-          </p>
           <ul
             className="hero__highlights"
             aria-label="Otras noticias relevantes"
@@ -1386,12 +1382,6 @@ const WrittenHighlights = () => {
     return items.slice(0, OTHER_NEWS_LIMIT).map((item, index) => {
       const title =
         typeof item.title === 'string' && item.title.trim().length > 0 ? item.title.trim() : 'Noticia sin título';
-      const lead = typeof item.lead === 'string' ? item.lead : '';
-      const body = typeof item.body === 'string' ? item.body : '';
-      const excerptSource = lead.trim().length > 0 ? lead : body;
-      const excerpt = truncateText(
-        excerptSource.length > 0 ? excerptSource : 'Pronto añadiremos más detalles de esta noticia.'
-      );
       const imageUrl =
         typeof item.imageUrl === 'string' && item.imageUrl.trim().length > 0
           ? item.imageUrl.trim()
@@ -1401,7 +1391,6 @@ const WrittenHighlights = () => {
       return {
         id: item.id ?? `news-${index}`,
         title,
-        excerpt,
         imageUrl,
         slug,
       };
@@ -1439,7 +1428,6 @@ const WrittenHighlights = () => {
                 </div>
                 <div className="written-card__content">
                   <h3>{article.title}</h3>
-                  <p>{article.excerpt}</p>
                   {href ? (
                     <Link to={href} className="written-card__cta" aria-label={`Leer más sobre ${article.title}`}>
                       Leer más
