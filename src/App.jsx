@@ -631,9 +631,6 @@ const Hero = () => {
         typeof article.title === 'string' && article.title.trim().length > 0
           ? article.title.trim()
           : 'Noticia sin título';
-      const lead = typeof article.lead === 'string' ? article.lead.trim() : '';
-      const body = typeof article.body === 'string' ? article.body.trim() : '';
-      const summary = lead.length > 0 ? lead : body;
       const slug = typeof article.slug === 'string' && article.slug.trim().length > 0 ? article.slug.trim() : null;
       const preferredPath = getPreferredPathForTags(article.tags);
       const href = slug ? (preferredPath ? `${preferredPath}/${slug}` : `/noticias/${slug}`) : null;
@@ -641,7 +638,6 @@ const Hero = () => {
       return {
         id: article.id ?? `hero-highlight-${index}`,
         title,
-        summary,
         href,
       };
     });
@@ -719,7 +715,6 @@ const Hero = () => {
                         ) : (
                           <span className="hero__highlight-title">{item.title}</span>
                         )}
-                        {item.summary ? <p>{item.summary}</p> : null}
                         {item.href ? (
                           <Link to={item.href} className="hero__highlight-cta" aria-label={`Leer más sobre ${item.title}`}>
                             Leer más →
@@ -741,7 +736,6 @@ const Hero = () => {
                       ) : (
                         <span className="hero__highlight-title">{item.title}</span>
                       )}
-                      {item.summary ? <p>{item.summary}</p> : null}
                       {item.href ? (
                         <Link
                           to={item.href}
@@ -1731,37 +1725,114 @@ const Footer = () => {
           <p>
             Plataforma de noticias y análisis sobre acuicultura, lechería, agricultura y turismo en la zona sur de Chile.
           </p>
+          <p className="footer__brand-meta">Desde 2023 impulsando el periodismo especializado para la macrozona sur.</p>
         </div>
 
         <div className="footer__section">
-          <h4>Menú navegación completa</h4>
+          <h4>Secciones principales</h4>
           <ul>
-            <li><Link to="/">Inicio</Link></li>
-            <li><Link to="/acuicultura/salmonicultura">Acuicultura</Link></li>
-            <li><Link to="/lecheria">Lechería</Link></li>
-            <li><Link to="/turismo/operadores">Turismo</Link></li>
-            <li><Link to="/economia-desarrollo">Economía y desarrollo</Link></li>
-            <li><Link to="/pymes">PyME's</Link></li>
-            <li><Link to="/contacto">Contacto</Link></li>
+            <li>
+              <Link to="/">Inicio</Link>
+            </li>
+            <li>
+              <Link to="/acuicultura/salmonicultura">Acuicultura</Link>
+            </li>
+            <li>
+              <Link to="/lecheria">Lechería</Link>
+            </li>
+            <li>
+              <Link to="/turismo/operadores">Turismo</Link>
+            </li>
+            <li>
+              <Link to="/economia-desarrollo">Economía y desarrollo</Link>
+            </li>
+            <li>
+              <Link to="/pymes">PyME's</Link>
+            </li>
+            <li>
+              <Link to="/contacto">Contacto</Link>
+            </li>
+          </ul>
+        </div>
+
+        <div className="footer__section footer__section--team">
+          <h4>Equipo Marka-E</h4>
+          <ul className="footer__list footer__list--roles">
+            <li className="footer__list-item">
+              <span className="footer__item-label">Diseño web e informática</span>
+              <span className="footer__item-value">Álvaro Figueroa Zapata</span>
+            </li>
+            <li className="footer__list-item">
+              <span className="footer__item-label">Desarrollo software</span>
+              <span className="footer__item-value">Cristóbal Figueroa</span>
+            </li>
+            <li className="footer__list-item">
+              <span className="footer__item-label">Periodista área acuícola</span>
+              <span className="footer__item-value">Adrián Maldonado</span>
+            </li>
+            <li className="footer__list-item">
+              <span className="footer__item-label">Publicista</span>
+              <span className="footer__item-value">Guillermo Vera Yáñez</span>
+            </li>
+            <li className="footer__list-item">
+              <span className="footer__item-label">Director</span>
+              <span className="footer__item-value">David Rivas Freire</span>
+            </li>
+          </ul>
+        </div>
+
+        <div className="footer__section footer__section--partners">
+          <h4>Empresas partner</h4>
+          <ul className="footer__list">
+            <li>
+              <a href="https://www.codecland.com" target="_blank" rel="noopener noreferrer">
+                Codecland IT Solutions
+              </a>
+            </li>
+            <li>
+              <a href="https://www.agenciamarka.cl" target="_blank" rel="noopener noreferrer">
+                Agencia Marka, desarrollo audiovisual
+              </a>
+            </li>
           </ul>
         </div>
 
         <div className="footer__section">
-          <h4>Datos legales / privacidad</h4>
+          <h4>Datos legales y privacidad</h4>
           <ul>
-            <li><a href="#">Aviso legal</a></li>
-            <li><a href="#">Política de privacidad</a></li>
-            <li><a href="#">Términos de uso</a></li>
-            <li><a href="#">Cookies</a></li>
+            <li>
+              <a href="#">Aviso legal</a>
+            </li>
+            <li>
+              <a href="#">Política de privacidad</a>
+            </li>
+            <li>
+              <a href="#">Términos de uso</a>
+            </li>
+            <li>
+              <a href="#">Cookies</a>
+            </li>
           </ul>
         </div>
 
         <div className="footer__section">
           <h4>Redes sociales</h4>
           <ul>
-            <li><a href="#">Instagram</a></li>
-            <li><a href="#">YouTube</a></li>
-            <li><a href="#">LinkedIn</a></li>
+            <li>
+              <a href="https://www.instagram.com/markae_md/" target="_blank" rel="noopener noreferrer">
+                Instagram
+              </a>
+            </li>
+            <li>
+              <a href="https://www.youtube.com/@Markae_MD" target="_blank" rel="noopener noreferrer">
+                YouTube
+              </a>
+            </li>
+            <li>
+              <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">
+                LinkedIn
+              </a>
+            </li>
           </ul>
         </div>
       </div>
