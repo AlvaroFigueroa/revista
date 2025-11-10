@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { Routes, Route, Link, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
@@ -11,6 +11,7 @@ import { useHeroContent, HERO_STATUS } from './hooks/useHeroContent';
 import { useNews, NEWS_STATUS } from './hooks/useNews';
 import { NAVIGATION_TAGS } from './constants/navigationTags';
 import { getNewsBySlug } from './services/news';
+import VideoModal from './components/VideoModal';
 
 const TAG_TO_PATH = Object.entries(NAVIGATION_TAGS).reduce((accumulator, [path, label]) => {
   if (typeof label === 'string' && label.trim().length > 0) {
@@ -935,6 +936,64 @@ const NewsDetailPage = ({ sectionPath = null }) => {
 const RECENT_VIDEOS_TAG = 'Videos recientes';
 const MAX_HOME_VIDEOS = 10;
 
+// Componente de tarjeta de video reutilizable
+const VideoCard = ({ video, onClick }) => {
+  const title = typeof video.title === 'string' && video.title.trim().length > 0 
+    ? video.title.trim() 
+    : 'Video sin título';
+  const embedUrl = typeof video.embedUrl === 'string' && video.embedUrl.trim().length > 0 
+    ? video.embedUrl.trim() 
+    : '';
+  
+  // Extraer la miniatura del video de YouTube
+  const thumbnailUrl = useMemo(() => {
+    if (!embedUrl) return '';
+    try {
+      const url = new URL(embedUrl);
+      const videoId = url.pathname.split('/').pop();
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    } catch {
+      return '';
+    }
+  }, [embedUrl]);
+
+  return (
+    <article 
+      className="video-card" 
+      role="listitem"
+      onClick={() => onClick(video)}
+      style={{ cursor: 'pointer' }}
+      aria-label={`Ver video: ${title}`}
+    >
+      <div className="video-card__player">
+        {thumbnailUrl ? (
+          <div className="video-card__thumbnail">
+            <img 
+              src={thumbnailUrl} 
+              alt={`Miniatura de ${title}`} 
+              loading="lazy"
+            />
+            <div className="video-card__play-button" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="48" height="48">
+                <path d="M8 5v14l11-7z" fill="white"/>
+              </svg>
+            </div>
+          </div>
+        ) : (
+          <div className="video-card__placeholder">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </div>
+        )}
+      </div>
+      <div className="video-card__meta">
+        <h3 className="video-card__title">{title}</h3>
+      </div>
+    </article>
+  );
+};
+
 const RecentVideos = () => {
   const { data: heroData } = useHeroContent();
 
@@ -946,6 +1005,18 @@ const RecentVideos = () => {
   }, [heroData?.tag]);
 
   const { items, status, error } = useVideos({ tag: activeTag, limit: MAX_HOME_VIDEOS });
+
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const handleVideoClick = useCallback((video) => {
+    if (video?.embedUrl) {
+      setSelectedVideo(video);
+    }
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedVideo(null);
+  }, []);
 
   const normalizedItems = useMemo(() => {
     const uniqueItems = [];
@@ -1036,21 +1107,25 @@ const RecentVideos = () => {
           const embedUrl = typeof video.embedUrl === 'string' ? video.embedUrl : '';
 
           return (
-            <article key={video._internalKey} className="video-card" role="listitem">
-              <div className="video-card__player">
-                <iframe
-                  src={embedUrl}
-                  title={title}
-                  frameBorder="0"
-                  allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                ></iframe>
-              </div>
-              <div className="video-card__meta">{title}</div>
-            </article>
+            <VideoCard 
+              key={video._internalKey}
+              video={{
+                ...video,
+                title,
+                embedUrl
+              }}
+              onClick={handleVideoClick}
+            />
           );
         })}
       </div>
+      {selectedVideo && (
+        <VideoModal
+          videoUrl={selectedVideo.embedUrl}
+          title={selectedVideo.title}
+          onClose={handleCloseModal}
+        />
+      )}
     </section>
   );
 };
