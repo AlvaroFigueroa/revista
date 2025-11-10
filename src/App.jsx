@@ -616,13 +616,6 @@ const Hero = () => {
     return 'https://www.youtube.com/embed/_jDeXfDVK10?autoplay=1&mute=1&rel=0&playsinline=1';
   }, [data.videoUrl]);
 
-  const heroTag = useMemo(() => {
-    if (typeof data.tag === 'string' && data.tag.trim().length > 0) {
-      return data.tag.trim();
-    }
-    return 'Videos recientes';
-  }, [data.tag]);
-
   const heroHighlights = useMemo(() => {
     if (!Array.isArray(heroNewsItems)) return [];
 
@@ -650,7 +643,7 @@ const Hero = () => {
       <div className="hero__content">
         <div className="hero__primary hero__panel hero__panel--feature">
           <div className="hero__panel-header" aria-hidden="true">
-            <span className="title-badge title-badge--compact">{heroTag}</span>
+            <span className="title-badge title-badge--compact">Noticia destacada</span>
           </div>
           <div className="hero__feature-heading">
             <h2 id="hero-featured">
