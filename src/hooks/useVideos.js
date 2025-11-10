@@ -60,8 +60,18 @@ export function useVideos({ tag, limit = DEFAULT_LIMIT } = {}) {
       tag: normalizedTag,
       limit: effectiveLimit,
       onNext: (docs) => {
-        setItems(docs);
-        setStatus(docs.length === 0 ? VIDEOS_STATUS.empty : VIDEOS_STATUS.ready);
+        // Eliminar duplicados por ID
+        const uniqueVideos = docs.reduce((acc, current) => {
+          const x = acc.find(item => item.id === current.id);
+          if (!x) {
+            return acc.concat([current]);
+          } else {
+            return acc;
+          }
+        }, []);
+        
+        setItems(uniqueVideos);
+        setStatus(uniqueVideos.length === 0 ? VIDEOS_STATUS.empty : VIDEOS_STATUS.ready);
       },
       onError: (subscriptionError) => {
         setError(parseError(subscriptionError));

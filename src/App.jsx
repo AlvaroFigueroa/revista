@@ -948,10 +948,23 @@ const RecentVideos = () => {
   const { items, status, error } = useVideos({ tag: activeTag, limit: MAX_HOME_VIDEOS });
 
   const normalizedItems = useMemo(() => {
-    const safeItems = Array.isArray(items) ? items.slice(0, MAX_HOME_VIDEOS) : [];
-    const filled = safeItems.map((item, index) => ({
+    const uniqueItems = [];
+    const seenIds = new Set();
+    
+    if (Array.isArray(items)) {
+      for (const item of items) {
+        if (item?.id && !seenIds.has(item.id)) {
+          seenIds.add(item.id);
+          uniqueItems.push(item);
+        }
+      }
+    }
+    
+    const safeItems = uniqueItems.slice(0, MAX_HOME_VIDEOS);
+    
+    const filled = safeItems.map((item) => ({
       ...item,
-      _internalKey: item.id ?? `video-${index}`,
+      _internalKey: `video-${item.id}`,
     }));
 
     for (let index = filled.length; index < MAX_HOME_VIDEOS; index += 1) {
