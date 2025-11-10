@@ -1160,6 +1160,23 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
+  
+  // Asegurar que el contenedor principal ocupe todo el ancho
+  useEffect(() => {
+    const mainContent = document.querySelector('.inner-page');
+    if (mainContent) {
+      mainContent.style.maxWidth = '100%';
+      mainContent.style.padding = '0';
+    }
+    
+    // Restaurar estilos al desmontar
+    return () => {
+      if (mainContent) {
+        mainContent.style.maxWidth = '';
+        mainContent.style.padding = '';
+      }
+    };
+  }, []);
 
   const normalizedItems = useMemo(() => {
     if (!Array.isArray(items)) return [];
@@ -1285,7 +1302,7 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
         )}
 
         {tag ? (
-          <section className="inner-page__videos" aria-label={`Videos de ${title}`}>
+          <section className="videos" aria-label={`Videos de ${title}`}>
             <header className="section-heading">
               <h2>
                 <span className="title-badge">Videos</span> {title}
