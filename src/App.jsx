@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import './styles/videoGrid.css';
 import { Routes, Route, Link, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
@@ -962,33 +963,117 @@ const VideoCard = ({ video, onClick }) => {
       className="video-card" 
       role="listitem"
       onClick={() => onClick(video)}
-      style={{ cursor: 'pointer' }}
+      style={{
+        cursor: 'pointer',
+        width: '100%',
+        maxWidth: '100%',
+        margin: '0',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        background: 'white',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        border: '1px solid #e2e8f0'
+      }}
       aria-label={`Ver video: ${title}`}
     >
-      <div className="video-card__player">
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        paddingTop: '56.25%', /* Proporción 16:9 */
+        overflow: 'hidden',
+        backgroundColor: '#f8fafc',
+        borderBottom: '1px solid #f1f5f9',
+        flexShrink: '0'
+      }}>
         {thumbnailUrl ? (
-          <div className="video-card__thumbnail">
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
             <img 
               src={thumbnailUrl} 
               alt={`Miniatura de ${title}`} 
               loading="lazy"
+              style={{
+                position: 'absolute',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
             />
-            <div className="video-card__play-button" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="48" height="48">
-                <path d="M8 5v14l11-7z" fill="white"/>
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '60px',
+              height: '60px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: '2',
+              transition: 'all 0.2s ease',
+              opacity: '0.9'
+            }} aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="white">
+                <path d="M8 5v14l11-7z"/>
               </svg>
             </div>
           </div>
         ) : (
-          <div className="video-card__placeholder">
-            <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#e2e8f0'
+          }}>
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="#94a3b8">
               <path d="M8 5v14l11-7z"/>
             </svg>
           </div>
         )}
       </div>
-      <div className="video-card__meta">
-        <h3 className="video-card__title">{title}</h3>
+      <div style={{
+        padding: '12px',
+        flex: '1',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+      }}>
+        <h3 style={{
+          fontSize: '0.95rem',
+          fontWeight: '600',
+          color: '#1e293b',
+          margin: '0',
+          display: '-webkit-box',
+          WebkitLineClamp: '2',
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          minHeight: '2.8em',
+          lineHeight: '1.4',
+          letterSpacing: '-0.01em',
+          wordBreak: 'break-word'
+        }}>{title}</h3>
       </div>
     </article>
   );
@@ -1071,7 +1156,7 @@ const RecentVideos = () => {
   const statusRole = hasError ? 'alert' : loading ? 'status' : 'note';
 
   return (
-    <section className="videos" aria-labelledby="recent-videos">
+    <section className="videos videos--home" aria-labelledby="recent-videos">
       <div className="videos__header section-heading">
         <h2 id="recent-videos">
           <span className="title-badge">Videos recientes</span>
@@ -1085,7 +1170,7 @@ const RecentVideos = () => {
           {statusMessage}
         </p>
       ) : null}
-      <div className="videos__grid" role="list">
+      <div className="videos__grid videos__grid--home" role="list">
         {normalizedItems.map((video) => {
           if (video.isPlaceholder) {
             return (
@@ -1164,19 +1249,77 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
   // Asegurar que el contenedor principal ocupe todo el ancho
   useEffect(() => {
     const mainContent = document.querySelector('.inner-page');
+    const innerContent = document.querySelector('.inner-page__content');
+    
     if (mainContent) {
       mainContent.style.maxWidth = '100%';
       mainContent.style.padding = '0';
+      mainContent.style.margin = '0';
     }
+    
+    if (innerContent) {
+      innerContent.style.maxWidth = '100%';
+      innerContent.style.padding = '0';
+      innerContent.style.margin = '0';
+    }
+    
+    // Aplicar estilos específicos para la sección de videos
+    const videosSection = document.querySelector('.videos');
+    if (videosSection) {
+      videosSection.style.width = '100%';
+      videosSection.style.maxWidth = '100%';
+      videosSection.style.margin = '0 auto';
+      videosSection.style.padding = '2rem 0 3rem';
+      videosSection.style.backgroundColor = '#f8fafc';
+      videosSection.style.boxSizing = 'border-box';
+    }
+    
+    // Asegurar que el grid de videos ocupe todo el ancho
+    const videosGrid = document.querySelector('.videos__grid');
+    if (videosGrid) {
+      videosGrid.style.maxWidth = '1400px';
+      videosGrid.style.margin = '0 auto';
+      videosGrid.style.padding = '0 2rem';
+      videosGrid.style.display = 'grid';
+      videosGrid.style.gridTemplateColumns = 'repeat(4, minmax(240px, 1fr))';
+      videosGrid.style.gap = '1.5rem';
+      videosGrid.style.width = '100%';
+      videosGrid.style.boxSizing = 'border-box';
+    }
+    
+    // Asegurar que los títulos de las tarjetas de video tengan el mismo estilo
+    const videoTitles = document.querySelectorAll('.video-card__title');
+    videoTitles.forEach(title => {
+      title.style.fontSize = '0.95rem';
+      title.style.fontWeight = '600';
+      title.style.color = '#1e293b';
+      title.style.margin = '0';
+      title.style.display = '-webkit-box';
+      title.style.WebkitLineClamp = '2';
+      title.style.WebkitBoxOrient = 'vertical';
+      title.style.overflow = 'hidden';
+      title.style.textOverflow = 'ellipsis';
+      title.style.minHeight = '2.8em';
+      title.style.lineHeight = '1.4';
+      title.style.letterSpacing = '-0.01em';
+      title.style.wordBreak = 'break-word';
+    });
     
     // Restaurar estilos al desmontar
     return () => {
       if (mainContent) {
         mainContent.style.maxWidth = '';
         mainContent.style.padding = '';
+        mainContent.style.margin = '';
+      }
+      
+      if (innerContent) {
+        innerContent.style.maxWidth = '';
+        innerContent.style.padding = '';
+        innerContent.style.margin = '';
       }
     };
-  }, []);
+  }, [tag]); // Se ejecuta cuando cambia el tag de la sección
 
   const normalizedItems = useMemo(() => {
     if (!Array.isArray(items)) return [];
@@ -1256,13 +1399,30 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
   const heroClassName = heroVariant.length > 0 ? `inner-page__hero ${heroVariant}` : 'inner-page__hero';
 
   return (
-    <section className="inner-page" aria-labelledby={headingId}>
+    <section className="inner-page" aria-labelledby={headingId} style={{
+      maxWidth: '100%',
+      padding: '0',
+      margin: '0',
+      width: '100%'
+    }}>
       <div className={heroClassName}>
-        <h1 id={headingId}>{title}</h1>
-        <p>{intro}</p>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '0 2rem',
+          width: '100%'
+        }}>
+          <h1 id={headingId}>{title}</h1>
+          <p>{intro}</p>
+        </div>
       </div>
 
-      <div className="inner-page__content">
+      <div className="inner-page__content" style={{
+        maxWidth: '100%',
+        padding: '0',
+        margin: '0',
+        width: '100%'
+      }}>
         {status === NEWS_STATUS.loading ? (
           <p role="status">Cargando noticias…</p>
         ) : status === NEWS_STATUS.error ? (
@@ -1301,59 +1461,35 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
           </div>
         )}
 
-        {tag ? (
+        {tag && normalizedVideos.length > 0 && (
           <section className="videos" aria-label={`Videos de ${title}`}>
-            <header className="section-heading">
-              <h2>
-                <span className="title-badge">Videos</span> {title}
-              </h2>
-            </header>
-
-            {videosMessage ? (
-              <p
-                className={`videos__status videos__status--${
-                  videosStatus === VIDEOS_STATUS.error
-                    ? 'error'
-                    : videosStatus === VIDEOS_STATUS.loading
-                    ? 'loading'
-                    : 'note'
-                }`}
-                role={videosStatus === VIDEOS_STATUS.error ? 'alert' : videosStatus === VIDEOS_STATUS.loading ? 'status' : 'note'}
-              >
-                {videosMessage}
-              </p>
-            ) : (
-              <div className="videos__grid" role="list">
-                {normalizedVideos.map((video) => {
-                  const title = typeof video.title === 'string' && video.title.trim().length > 0 
-                    ? video.title.trim() 
-                    : 'Video sin título';
-                  const embedUrl = typeof video.embedUrl === 'string' ? video.embedUrl.trim() : '';
-                  
-                  return (
-                    <VideoCard 
-                      key={video.id}
-                      video={{
-                        ...video,
-                        title,
-                        embedUrl
-                      }}
-                      onClick={handleVideoClick}
-                    />
-                  );
-                })}
-                {selectedVideo && (
-                  <VideoModal
-                    videoUrl={selectedVideo.embedUrl}
-                    title={selectedVideo.title}
-                    onClose={handleCloseModal}
+            <div className="videos__container">
+              <header className="section-heading">
+                <h2>
+                  <span className="title-badge">Videos</span>
+                  <span>{title}</span>
+                </h2>
+              </header>
+              <div className="videos__grid">
+                {normalizedVideos.map((video) => (
+                  <VideoCard 
+                    key={video.id}
+                    video={video}
+                    onClick={handleVideoClick}
                   />
-                )}
+                ))}
               </div>
-            )}
+            </div>
           </section>
-        ) : null}
+        )}
       </div>
+      
+      {selectedVideo && (
+        <VideoModal
+          video={selectedVideo}
+          onClose={handleCloseModal}
+        />
+      )}
     </section>
   );
 };
