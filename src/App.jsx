@@ -1145,6 +1145,18 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
     error: videosError,
   } = useVideos({ tag, limit: null });
 
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const handleVideoClick = useCallback((video) => {
+    if (video?.embedUrl) {
+      setSelectedVideo(video);
+    }
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedVideo(null);
+  }, []);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
@@ -1295,20 +1307,31 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
               </p>
             ) : (
               <div className="videos__grid" role="list">
-                {normalizedVideos.map((video) => (
-                  <article key={video.id} className="video-card" role="listitem">
-                    <div className="video-card__player">
-                      <iframe
-                        src={video.embedUrl}
-                        title={video.title}
-                        frameBorder="0"
-                        allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                    <div className="video-card__meta">{video.title}</div>
-                  </article>
-                ))}
+                {normalizedVideos.map((video) => {
+                  const title = typeof video.title === 'string' && video.title.trim().length > 0 
+                    ? video.title.trim() 
+                    : 'Video sin título';
+                  const embedUrl = typeof video.embedUrl === 'string' ? video.embedUrl.trim() : '';
+                  
+                  return (
+                    <VideoCard 
+                      key={video.id}
+                      video={{
+                        ...video,
+                        title,
+                        embedUrl
+                      }}
+                      onClick={handleVideoClick}
+                    />
+                  );
+                })}
+                {selectedVideo && (
+                  <VideoModal
+                    videoUrl={selectedVideo.embedUrl}
+                    title={selectedVideo.title}
+                    onClose={handleCloseModal}
+                  />
+                )}
               </div>
             )}
           </section>

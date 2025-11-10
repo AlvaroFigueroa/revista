@@ -25,6 +25,31 @@ const VideoModal = ({ videoUrl, title, onClose }) => {
     }
   };
 
+  // Función para modificar la URL del video para autoplay
+  const getEmbedUrlWithAutoplay = (url) => {
+    if (!url) return '';
+    
+    try {
+      // Si es un video de YouTube
+      if (url.includes('youtube.com/embed/')) {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}autoplay=1&mute=1`;
+      }
+      
+      // Si es un video de Vimeo
+      if (url.includes('player.vimeo.com/video/')) {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}autoplay=1`;
+      }
+      
+      // Para otros proveedores de video
+      return url;
+    } catch (error) {
+      console.error('Error al procesar la URL del video:', error);
+      return url;
+    }
+  };
+
   return createPortal(
     <div 
       className="video-modal" 
@@ -46,11 +71,16 @@ const VideoModal = ({ videoUrl, title, onClose }) => {
         </div>
         <div className="video-modal__player">
           <iframe
-            src={videoUrl}
+            src={getEmbedUrlWithAutoplay(videoUrl)}
             title={title || 'Reproductor de video'}
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
+            autoPlay
+            playsInline
+            webkitallowfullscreen
+            mozallowfullscreen
+            referrerPolicy="origin"
           ></iframe>
         </div>
       </div>
