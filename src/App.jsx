@@ -372,10 +372,18 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header__top">
-        <div className="header__logo">
+        <Link
+          to="/"
+          className="header__logo"
+          aria-label="Ir al inicio"
+          onClick={() => {
+            setActiveSubmenu(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        >
           <img src="/imagenes/logo.png" alt="marka_e" className="header__logo-image" />
           <span className="sr-only">marka_e medio digital</span>
-        </div>
+        </Link>
 
         <div className="header__search">
           <span className="header__search-icon" aria-hidden>🔍</span>
