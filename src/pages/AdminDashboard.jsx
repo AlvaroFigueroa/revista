@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useHeroContent, HERO_STATUS } from '../hooks/useHeroContent';
@@ -6,8 +7,8 @@ import HeroForm from '../components/Admin/HeroForm';
 import VideoForm from '../components/Admin/VideoForm';
 import VideoList from '../components/Admin/VideoList';
 import { HOME_SECTION_TITLES } from '../constants/homeSections';
-import { useVideos, VIDEOS_STATUS } from '../hooks/useVideos';
-import { createVideo, updateVideo, deleteVideo } from '../services/videos';
+import { createVideo, updateVideo, deleteVideo, fetchVideosPage } from '../services/videos';
+
 import NewsForm from '../components/Admin/NewsForm';
 import NewsList from '../components/Admin/NewsList';
 import { useNews, NEWS_STATUS } from '../hooks/useNews';
@@ -20,11 +21,55 @@ const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const { data, status: heroStatus, isFallback } = useHeroContent();
 
-  const [selectedTag, setSelectedTag] = useState(DEFAULT_VIDEOS_TAG);
-  const { items: videos, status: videosStatus, error: videosError } = useVideos({
-    tag: selectedTag,
-    limit: 10
-  });
+  // Por defecto mostrar todos los videos (últimos 10)
+  const [selectedTag, setSelectedTag] = useState('Todas');
+
+  // Estado local para listado con paginación manual (administración)
+  const [adminVideos, setAdminVideos] = useState([]);
+  const [adminStatus, setAdminStatus] = useState('idle'); // idle|loading|ready|empty|error
+  const [adminError, setAdminError] = useState(null);
+  const [adminCursor, setAdminCursor] = useState(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Carga inicial o cuando cambia la etiqueta
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setAdminStatus('loading');
+      setAdminError(null);
+      try {
+        const tagForQuery = selectedTag === 'Todas' ? '' : selectedTag;
+        const { items, cursor } = await fetchVideosPage({ tag: tagForQuery, limit: 10, after: null });
+        if (cancelled) return;
+        setAdminVideos(items);
+        setAdminCursor(cursor);
+        setAdminStatus(items.length === 0 ? 'empty' : 'ready');
+      } catch (e) {
+        if (cancelled) return;
+        setAdminError(e);
+        setAdminStatus('error');
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTag]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!adminCursor) return;
+    setIsLoadingMore(true);
+    try {
+      const tagForQuery = selectedTag === 'Todas' ? '' : selectedTag;
+      const { items, cursor } = await fetchVideosPage({ tag: tagForQuery, limit: 10, after: adminCursor });
+      setAdminVideos((prev) => prev.concat(items));
+      setAdminCursor(cursor);
+    } catch (e) {
+      setAdminError(e);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [adminCursor, selectedTag]);
 
   const [newsTagFilter, setNewsTagFilter] = useState('');
   const {
@@ -259,7 +304,8 @@ const AdminDashboard = () => {
   };
 
   const handleTagChange = (event) => {
-    setSelectedTag(event.target.value);
+    const value = event.target.value;
+    setSelectedTag(value);
   };
 
   const handleNewsTagChange = (event) => {
@@ -267,8 +313,7 @@ const AdminDashboard = () => {
     setNewsTagFilter(value === 'Todas' ? '' : value);
   };
 
-  const videosStatusForList =
-    videosStatus === VIDEOS_STATUS.ready && videos.length === 0 ? VIDEOS_STATUS.empty : videosStatus;
+  const videosStatusForList = adminStatus;
 
   const newsStatusForList =
     newsStatus === NEWS_STATUS.ready && newsItems.length === 0 ? NEWS_STATUS.empty : newsStatus;
@@ -335,6 +380,7 @@ const AdminDashboard = () => {
               <label className="admin-dashboard__select">
                 <span>Etiqueta</span>
                 <select value={selectedTag} onChange={handleTagChange}>
+                  <option value="Todas">Todas</option>
                   {HOME_SECTION_TITLES.map((tag) => (
                     <option key={tag} value={tag}>
                       {tag}
@@ -342,19 +388,16 @@ const AdminDashboard = () => {
                   ))}
                 </select>
               </label>
-              <button type="button" onClick={isFormOpen ? closeForm : openCreateForm}>
-                {isFormOpen ? 'Cerrar formulario' : 'Agregar video'}
-              </button>
             </div>
           </header>
 
-          {videosError ? (
+          {adminError ? (
             <div className="admin-dashboard__status admin-dashboard__status--error" role="alert">
-              <p>{videosError.message || 'No pudimos cargar los videos. Intenta nuevamente.'}</p>
-              {videosError.requiresIndex && videosError.indexUrl ? (
+              <p>{adminError.message || 'No pudimos cargar los videos. Intenta nuevamente.'}</p>
+              {adminError.requiresIndex && adminError.indexUrl ? (
                 <p>
                   Crea el índice compuesto desde{' '}
-                  <a href={videosError.indexUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={adminError.indexUrl} target="_blank" rel="noopener noreferrer">
                     este enlace en la consola de Firebase
                   </a>
                   . Una vez generado, vuelve a intentar cargar la etiqueta.
@@ -380,11 +423,17 @@ const AdminDashboard = () => {
           ) : null}
 
           <VideoList
-            items={videos}
+            items={adminVideos}
             status={videosStatusForList}
             onEdit={openEditForm}
             onDelete={handleDelete}
           />
+
+          <div className="admin-table__footer">
+            <button type="button" onClick={handleLoadMore} disabled={!adminCursor || isLoadingMore}>
+              {isLoadingMore ? 'Cargando…' : adminCursor ? 'Cargar más' : 'No hay más resultados'}
+            </button>
+          </div>
 
           {feedback ? (
             <p

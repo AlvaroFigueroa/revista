@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { subscribeToVideos } from '../services/videos';
+import { subscribeToVideos, sanitizeEmbedUrl } from '../services/videos';
 
 const DEFAULT_LIMIT = 10;
 
@@ -60,16 +60,23 @@ export function useVideos({ tag, limit = DEFAULT_LIMIT } = {}) {
       tag: normalizedTag,
       limit: effectiveLimit,
       onNext: (docs) => {
-        // Eliminar duplicados por ID
-        const uniqueVideos = docs.reduce((acc, current) => {
-          const x = acc.find(item => item.id === current.id);
-          if (!x) {
-            return acc.concat([current]);
-          } else {
-            return acc;
-          }
-        }, []);
-        
+        // Normalizar URL y deduplicar por ID de YouTube (preferido) o embedUrl canónico
+        const normalized = docs.map((v) => {
+          const safeUrl = typeof v.embedUrl === 'string' ? sanitizeEmbedUrl(v.embedUrl) : '';
+          const m = safeUrl.match(/embed\/([\-\w]{11})/);
+          const ytId = m ? m[1] : null;
+          return { ...v, embedUrl: safeUrl, _ytId: ytId };
+        });
+
+        const seen = new Set();
+        const uniqueVideos = [];
+        for (const v of normalized) {
+          const key = v._ytId || (v.embedUrl ? `url:${v.embedUrl}` : `doc:${v.id}`);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          uniqueVideos.push(v);
+        }
+
         setItems(uniqueVideos);
         setStatus(uniqueVideos.length === 0 ? VIDEOS_STATUS.empty : VIDEOS_STATUS.ready);
       },

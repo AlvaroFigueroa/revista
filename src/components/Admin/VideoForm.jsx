@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { HOME_SECTION_TITLES } from '../../constants/homeSections';
+import { HOME_SECTION_TITLES, EXCLUDED_EDITOR_TAGS } from '../../constants/homeSections';
+import { NAVIGATION_TAGS } from '../../constants/navigationTags';
 import { sanitizeEmbedUrl } from '../../services/videos';
 
 const MIN_TITLE_LENGTH = 6;
@@ -14,6 +15,13 @@ const VideoForm = ({
   errorMessage = null,
   onFeedback
 }) => {
+  const AVAILABLE_TAGS = useMemo(() => {
+    const excluded = new Set(EXCLUDED_EDITOR_TAGS || []);
+    const combined = [...HOME_SECTION_TITLES, ...Object.values(NAVIGATION_TAGS || {})];
+    return Array.from(new Set(combined.filter((t) => typeof t === 'string' && t.trim().length > 0 && !excluded.has(t))));
+  }, []);
+
+  const AVAILABLE_TAGS_SET = useMemo(() => new Set(AVAILABLE_TAGS), [AVAILABLE_TAGS]);
   const [formData, setFormData] = useState(() => ({
     title: defaultValues?.title ?? '',
     embedUrl: defaultValues?.embedUrl ?? '',
@@ -134,7 +142,7 @@ const VideoForm = ({
         <div className="admin-form__field">
           <span>Etiquetas (elige al menos una)</span>
           <div className="video-form__tags">
-            {HOME_SECTION_TITLES.map((tag) => {
+            {AVAILABLE_TAGS.map((tag) => {
               const isActive = formData.tags.includes(tag);
               return (
                 <button

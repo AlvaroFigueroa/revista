@@ -1088,16 +1088,8 @@ const VideoCard = ({ video, onClick }) => {
 };
 
 const RecentVideos = () => {
-  const { data: heroData } = useHeroContent();
-
-  const activeTag = useMemo(() => {
-    if (typeof heroData?.tag === 'string' && heroData.tag.trim().length > 0) {
-      return heroData.tag.trim();
-    }
-    return RECENT_VIDEOS_TAG;
-  }, [heroData?.tag]);
-
-  const { items, status, error } = useVideos({ tag: activeTag, limit: MAX_HOME_VIDEOS });
+  // Traer últimos 10 videos globales (sin filtrar por etiqueta)
+  const { items, status, error } = useVideos({ tag: '', limit: MAX_HOME_VIDEOS });
 
   const [selectedVideo, setSelectedVideo] = useState(null);
 
@@ -1112,35 +1104,39 @@ const RecentVideos = () => {
   }, []);
 
   const normalizedItems = useMemo(() => {
-    const uniqueItems = [];
-    const seenIds = new Set();
-    
-    if (Array.isArray(items)) {
-      for (const item of items) {
-        if (item?.id && !seenIds.has(item.id)) {
-          seenIds.add(item.id);
-          uniqueItems.push(item);
-        }
-      }
-    }
-    
-    const safeItems = uniqueItems.slice(0, MAX_HOME_VIDEOS);
-    
-    const filled = safeItems.map((item) => ({
-      ...item,
-      _internalKey: `video-${item.id}`,
+    // Sin deduplicación: mostrar hasta 10 tal como llegan para validar la fuente
+    const base = Array.isArray(items) ? items.slice(0, MAX_HOME_VIDEOS) : [];
+    const mapped = base.map((it, idx) => ({
+      ...it,
+      _internalKey:
+        (it?.id && `id:${it.id}`) ||
+        (typeof it?.embedUrl === 'string' && `embed:${it.embedUrl.trim()}`) ||
+        `idx:${idx}`,
     }));
 
-    for (let index = filled.length; index < MAX_HOME_VIDEOS; index += 1) {
-      filled.push({
+    for (let index = mapped.length; index < MAX_HOME_VIDEOS; index += 1) {
+      mapped.push({
         id: `placeholder-${index}`,
         _internalKey: `placeholder-${index}`,
         isPlaceholder: true,
       });
     }
 
-    return filled;
+    return mapped;
   }, [items]);
+
+  useEffect(() => {
+    const count = Array.isArray(items) ? items.length : 'no-array';
+    const real = Array.isArray(normalizedItems)
+      ? normalizedItems.filter((x) => !x.isPlaceholder).length
+      : 'no-array';
+    // Logs de diagnóstico temporales
+    console.log('[RecentVideos] items recibidos:', count);
+    if (Array.isArray(items)) {
+      console.log('[RecentVideos] ejemplos de embedUrl:', items.slice(0, 5).map((v) => v?.embedUrl));
+    }
+    console.log('[RecentVideos] items mostrados (sin placeholders):', real);
+  }, [items, normalizedItems]);
 
   const loading = status === VIDEOS_STATUS.loading;
   const hasError = status === VIDEOS_STATUS.error;
@@ -1153,10 +1149,10 @@ const RecentVideos = () => {
         : 'No pudimos cargar los videos. Mostramos espacios reservados.';
     }
     if (isEmpty) {
-      return 'Aún no hay videos asociados a esta etiqueta. Mantendremos los espacios disponibles.';
+      return 'Aún no hay videos disponibles. Mantendremos los espacios reservados.';
     }
     if (loading) {
-      return 'Cargando videos seleccionados…';
+      return 'Cargando videos recientes…';
     }
     return null;
   })();

@@ -3,12 +3,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocs,
   limit as limitConstraint,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
+  startAfter,
   updateDoc,
   where
 } from 'firebase/firestore';
@@ -56,6 +58,29 @@ export const sanitizeEmbedUrl = (value) => {
     return `https://www.youtube.com/embed/${standaloneId[1]}`;
   }
   return '';
+};
+
+// Paginación basada en getDocs (no tiempo real) para listados de administración
+export const fetchVideosPage = async ({ tag, limit = 10, after = null } = {}) => {
+  const constraints = [];
+
+  if (tag && typeof tag === 'string' && tag.trim().length > 0) {
+    constraints.push(where('tags', 'array-contains', tag.trim()));
+  }
+
+  constraints.push(orderBy('createdAt', 'desc'));
+
+  if (after) {
+    constraints.push(startAfter(after));
+  }
+
+  constraints.push(limitConstraint(limit));
+
+  const q = query(videosCollectionRef, ...constraints);
+  const snap = await getDocs(q);
+  const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const cursor = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+  return { items, cursor };
 };
 
 export const normalizeTags = (tags) => {
