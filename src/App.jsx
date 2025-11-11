@@ -858,6 +858,12 @@ const NewsDetailPage = ({ sectionPath = null }) => {
   const fallbackBackHref = sectionPath ?? '/';
   const fallbackBackLabel = fallbackSectionLabel ? `Volver a ${fallbackSectionLabel}` : 'Volver al inicio';
 
+  // Hook: noticias para el aside (debe ejecutarse SIEMPRE para respetar reglas de Hooks)
+  const { items: topNewsRaw } = useNews({ limit: 10 });
+  const topNews = Array.isArray(topNewsRaw)
+    ? topNewsRaw.filter((n) => n?.slug && n.slug !== (article?.slug || slug)).slice(0, 7)
+    : [];
+
   if (status !== DETAIL_STATUS.ready || !article) {
     const isLoading = status === DETAIL_STATUS.loading;
     const isNotFound = status === DETAIL_STATUS.notFound;
@@ -900,6 +906,7 @@ const NewsDetailPage = ({ sectionPath = null }) => {
   const hasBody = Array.isArray(article.bodyParagraphs) && article.bodyParagraphs.length > 0;
   const fallbackParagraph = article.lead || 'Pronto añadiremos más detalles de esta noticia.';
 
+
   return (
     <section className="inner-page news-detail" aria-labelledby="news-detail-title">
       <div className="inner-page__hero inner-page__hero--article">
@@ -921,17 +928,37 @@ const NewsDetailPage = ({ sectionPath = null }) => {
                 {publishedDate ? <li>Fecha: {publishedDate}</li> : null}
                 {article.source ? <li>Fuente: {article.source}</li> : null}
               </ul>
+              <div className="news-topreads" aria-label="Noticias más leídas">
+                <h3 className="news-topreads__title">Noticias más leídas</h3>
+                <ul className="news-aside__list">
+                  {topNews.map((it) => {
+                    const primary = resolvePrimaryTag(Array.isArray(it.tags) ? it.tags : []);
+                    const href = primary?.path ? `${primary.path}/${it.slug}` : `/noticias/${it.slug}`;
+                    const thumb = typeof it.imageUrl === 'string' ? it.imageUrl : '';
+                    const title = typeof it.title === 'string' ? it.title : 'Noticia';
+                    return (
+                      <li key={it.id || it.slug} className="news-aside__item">
+                        <Link to={href} className="news-aside__link">
+                          <span className="news-aside__thumb" aria-hidden="true">
+                            {thumb ? <img src={thumb} alt="" /> : <span className="news-aside__placeholder" />}
+                          </span>
+                          <span className="news-aside__title">{title}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </header>
             <div className="news-feature__content">
               {hasBody
                 ? article.bodyParagraphs.map((paragraph, index) => (
-                    <p key={`paragraph-${index}`}>{paragraph}</p>
-                  ))
-                : <p>{fallbackParagraph}</p>}
+                  <p key={`paragraph-${index}`}>{paragraph}</p>
+                ))
+              : <p>{fallbackParagraph}</p>}
             </div>
           </div>
         </article>
-
         <div className="news-feature__actions">
           <Link to={sectionHref} className="news-feature__back">
             ← {backLabel}
