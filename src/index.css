@@ -3019,7 +3019,7 @@ main {
 .footer {
   background-color: #3b61a5;
   color: #f8fafc;
-  padding: 2.5rem 2rem 2rem;
+  padding: 2rem 2rem 1.5rem;
   border-top: 1px solid rgba(15, 23, 42, 0.25);
 }
 
@@ -3027,6 +3027,43 @@ main {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 2rem;
+}
+
+/* Compactar espacio entre columnas en pantallas grandes */
+@media (min-width: 1024px) {
+  .footer__grid {
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .footer__section--social {
+    grid-column: 4;
+    grid-row: 2;
+  }
+}
+
+/* Cuando Redes sociales está dentro de Empresas partner, reducir separación */
+.footer__section--partners .footer__section--social {
+  margin-top: 1rem; /* separación solicitada */
+}
+
+/* Reducir márgenes y separación solo en Partners + Redes sociales */
+.footer__section--partners h4 {
+  margin-bottom: 0.5rem;
+}
+.footer__section--partners .footer__list {
+  gap: 0.4rem;
+}
+.footer__section--partners .footer__section--social h4 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.4rem;
+}
+.footer__section--partners .footer__section--social ul {
+  gap: 0.35rem;
 }
 
 .footer__brand p {
@@ -3110,8 +3147,8 @@ main {
 }
 
 .footer__bottom {
-  margin-top: 2rem;
-  padding-top: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
   border-top: 1px solid rgba(15, 23, 42, 0.18);
   display: flex;
   flex-direction: column;

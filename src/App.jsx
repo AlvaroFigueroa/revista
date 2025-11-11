@@ -2020,6 +2020,9 @@ const Footer = () => {
           <h4>Equipo Marka-E</h4>
           <ul className="footer__list footer__list--roles">
             <li className="footer__list-item">
+              <span className="footer__item-value">Javiera Rivas Acuña Ingeniera Comercial (UACh)</span>
+            </li>
+            <li className="footer__list-item">
               <span className="footer__item-label">Diseño web e informática</span>
               <span className="footer__item-value">Álvaro Figueroa Zapata</span>
             </li>
@@ -2056,46 +2059,29 @@ const Footer = () => {
               </a>
             </li>
           </ul>
+
+          <div className="footer__section footer__section--social">
+            <h4>Redes sociales</h4>
+            <ul>
+              <li>
+                <a href="https://www.instagram.com/markae_md/" target="_blank" rel="noopener noreferrer">
+                  Instagram
+                </a>
+              </li>
+              <li>
+                <a href="https://www.youtube.com/@Markae_MD" target="_blank" rel="noopener noreferrer">
+                  YouTube
+                </a>
+              </li>
+              <li>
+                <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">
+                  LinkedIn
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <div className="footer__section">
-          <h4>Datos legales y privacidad</h4>
-          <ul>
-            <li>
-              <a href="#">Aviso legal</a>
-            </li>
-            <li>
-              <a href="#">Política de privacidad</a>
-            </li>
-            <li>
-              <a href="#">Términos de uso</a>
-            </li>
-            <li>
-              <a href="#">Cookies</a>
-            </li>
-          </ul>
-        </div>
-
-        <div className="footer__section">
-          <h4>Redes sociales</h4>
-          <ul>
-            <li>
-              <a href="https://www.instagram.com/markae_md/" target="_blank" rel="noopener noreferrer">
-                Instagram
-              </a>
-            </li>
-            <li>
-              <a href="https://www.youtube.com/@Markae_MD" target="_blank" rel="noopener noreferrer">
-                YouTube
-              </a>
-            </li>
-            <li>
-              <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">
-                LinkedIn
-              </a>
-            </li>
-          </ul>
-        </div>
       </div>
 
       <div className="footer__bottom">
