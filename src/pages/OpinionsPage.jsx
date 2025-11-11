@@ -4,7 +4,7 @@ import { useOpinions } from '../hooks/useOpinions';
 const OpinionsPage = () => {
   const { items, status } = useOpinions({ limit: 50 });
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (

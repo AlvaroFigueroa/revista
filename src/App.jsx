@@ -7,6 +7,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLoginPage from './pages/AdminLogin';
 import { useVideos, VIDEOS_STATUS } from './hooks/useVideos';
+import { useEvents } from './hooks/useEvents';
 import { useAdminRole, ADMIN_ROLE_STATUS } from './hooks/useAdminRole';
 import { useHeroContent, HERO_STATUS } from './hooks/useHeroContent';
 import { useNews, NEWS_STATUS } from './hooks/useNews';
@@ -1975,33 +1976,13 @@ const ContactForm = () => {
 };
 
 const EventsFeed = () => {
-  const events = [
-    {
-      id: 1,
-      name: 'Agenda PyME Los Lagos',
-      date: '4 noviembre, 09:00',
-      dateTime: '2025-11-04T09:00:00-03:00',
-      location: 'Puerto Varas · Centro de Eventos Arena',
-      description: 'Encuentro para PyME’s del agro y turismo con rondas de negocios, asesoría financiera y talleres prácticos.'
-    },
-    {
-      id: 2,
-      name: 'Cumbre Innovación Agroalimentaria',
-      date: '7 noviembre, 10:30',
-      dateTime: '2025-11-07T10:30:00-03:00',
-      location: 'Valdivia · Parque Saval',
-      description: 'Panel sobre biotecnología aplicada, sustentabilidad hídrica y nuevos modelos de exportación para el sur de Chile.'
-    },
-    {
-      id: 3,
-      name: 'Seminario Talento Digital Austral',
-      date: '12 noviembre, 15:00',
-      dateTime: '2025-11-12T15:00:00-03:00',
-      location: 'Online · Transmisión en vivo',
-      description: 'Foro con empresas tecnológicas y universidades para abordar reconversión laboral, IA generativa y ciberseguridad.'
-    }
-  ];
-
+  const { items: events } = useEvents({ limit: 4 });
+  const eventsByUpload = [...events].sort((a, b) => {
+    const ax = a?.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+    const bx = b?.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+    return bx - ax;
+  });
+  const slots = [0, 1, 2, 3].map((i) => eventsByUpload[i] || null);
   return (
     <section className="events" aria-labelledby="events-feed">
       <div className="section-heading">
@@ -2010,17 +1991,35 @@ const EventsFeed = () => {
         </h2>
       </div>
       <div className="events__grid" role="list">
-        {events.map((event) => (
-          <article key={event.id} className="event-card" role="listitem">
-            <header className="event-card__header">
-              <h3>{event.name}</h3>
-              <time dateTime={event.dateTime}>{event.date}</time>
-            </header>
-            <p className="event-card__location">{event.location}</p>
-            <p className="event-card__description">{event.description}</p>
-            <button type="button" className="event-card__cta">Reservar cupo</button>
-          </article>
-        ))}
+        {slots.map((ev, idx) => {
+          if (!ev) {
+            return (
+              <article key={`placeholder-${idx}`} className="event-card" role="listitem" aria-hidden="true">
+                <header className="event-card__header">
+                  <h3>&nbsp;</h3>
+                  <span>&nbsp;</span>
+                </header>
+                <p className="event-card__location">&nbsp;</p>
+                <p className="event-card__description">&nbsp;</p>
+              </article>
+            );
+          }
+          const dateLabel = ev.startAt?.toDate ? ev.startAt.toDate().toLocaleString('es-CL', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+          const dateTime = ev.startAt?.toDate ? ev.startAt.toDate().toISOString() : '';
+          return (
+            <article key={ev.id} className="event-card" role="listitem">
+              <header className="event-card__header">
+                <h3>{ev.title}</h3>
+                <time dateTime={dateTime}>{dateLabel}</time>
+              </header>
+              {ev.location ? <p className="event-card__location">{ev.location}</p> : null}
+              {ev.description ? <p className="event-card__description">{ev.description}</p> : null}
+              {ev.ctaUrl ? (
+                <a className="event-card__cta" href={ev.ctaUrl} target="_blank" rel="noopener noreferrer">Reservar cupo</a>
+              ) : null}
+            </article>
+          );
+        })}
       </div>
     </section>
   );

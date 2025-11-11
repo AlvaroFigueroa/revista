@@ -17,6 +17,10 @@ import { useOpinions } from '../hooks/useOpinions';
 import OpinionForm from '../components/Admin/OpinionForm';
 import OpinionList from '../components/Admin/OpinionList';
 import { createOpinion, updateOpinion, deleteOpinion, generateOpinionId } from '../services/opinions';
+import { useEvents } from '../hooks/useEvents';
+import EventForm from '../components/Admin/EventForm';
+import EventList from '../components/Admin/EventList';
+import { createEvent, updateEvent, deleteEvent, generateEventId } from '../services/events';
 
 const DEFAULT_VIDEOS_TAG =
   HOME_SECTION_TITLES.find((title) => title === 'Videos recientes') ?? HOME_SECTION_TITLES[0];
@@ -60,6 +64,78 @@ const AdminDashboard = () => {
       cancelled = true;
     };
   }, [selectedTag]);
+
+  // Eventos: handlers
+  const openEventCreateForm = () => {
+    setEventFormMode('create');
+    setEventDefaults({ id: generateEventId(), title: '', location: '', description: '', date: '', time: '', ctaUrl: '' });
+    setIsEventFormOpen(true);
+    setEventFormStatus('idle');
+    setEventFormError(null);
+    setEventInstanceKey((v) => v + 1);
+  };
+
+  const openEventEditForm = (ev) => {
+    setEventFormMode('edit');
+    // Derivar date/time legibles desde startAt si existe
+    let date = '', time = '';
+    if (ev?.startAt?.toDate) {
+      const d = ev.startAt.toDate();
+      date = d.toISOString().slice(0,10);
+      time = d.toTimeString().slice(0,5);
+    }
+    setEventDefaults({ id: ev.id, title: ev.title || '', location: ev.location || '', description: ev.description || '', date: ev.date || date, time: ev.time || time, ctaUrl: ev.ctaUrl || '' });
+    setIsEventFormOpen(true);
+    setEventFormStatus('idle');
+    setEventFormError(null);
+    setEventInstanceKey((v) => v + 1);
+  };
+
+  const closeEventForm = () => {
+    setIsEventFormOpen(false);
+    setEventFormMode('create');
+    setEventDefaults(null);
+    setEventFormStatus('idle');
+    setEventFormError(null);
+  };
+
+  const handleEventSubmit = async (payload) => {
+    setEventFormStatus('saving');
+    setEventFormError(null);
+    try {
+      if (eventFormMode === 'edit' && eventDefaults?.id) {
+        const { id, ...updates } = payload;
+        await updateEvent(eventDefaults.id, updates);
+        setEventFormStatus('success');
+        window.setTimeout(() => closeEventForm(), 800);
+      } else {
+        const { id, ...data } = payload;
+        await createEvent({ id, ...data });
+        setEventFormStatus('success');
+        setEventDefaults({ id: generateEventId(), title: '', location: '', description: '', date: '', time: '', ctaUrl: '' });
+        setEventInstanceKey((v) => v + 1);
+      }
+    } catch (e) {
+      console.error('No pudimos guardar el evento', e);
+      setEventFormStatus('error');
+      setEventFormError(e?.message || 'No pudimos guardar el evento.');
+    }
+  };
+
+  const handleEventDelete = async (ev) => {
+    if (!ev?.id) return;
+    const ok = window.confirm(`¿Eliminar el evento "${ev.title}"?`);
+    if (!ok) return;
+    try {
+      await deleteEvent(ev.id);
+      setFeedback({ type: 'success', text: 'Evento eliminado.' });
+      scheduleFeedbackClear();
+    } catch (e) {
+      setFeedback({ type: 'error', text: e?.message || 'No pudimos eliminar el evento.' });
+      scheduleFeedbackClear();
+    }
+  };
+
 
   // Opiniones: handlers
   const openOpinionCreateForm = () => {
@@ -175,6 +251,15 @@ const AdminDashboard = () => {
   const [opinionFormStatus, setOpinionFormStatus] = useState('idle');
   const [opinionFormError, setOpinionFormError] = useState(null);
   const [opinionInstanceKey, setOpinionInstanceKey] = useState(0);
+
+  // Eventos
+  const { items: eventItems, status: eventStatus } = useEvents({ limit: 50 });
+  const [isEventFormOpen, setIsEventFormOpen] = useState(false);
+  const [eventFormMode, setEventFormMode] = useState('create');
+  const [eventDefaults, setEventDefaults] = useState(null);
+  const [eventFormStatus, setEventFormStatus] = useState('idle');
+  const [eventFormError, setEventFormError] = useState(null);
+  const [eventInstanceKey, setEventInstanceKey] = useState(0);
 
   const handleHeroSuccess = useCallback(() => {
     // El contenido del hero se actualiza automáticamente con el onSnapshot del hook.
@@ -445,6 +530,7 @@ const AdminDashboard = () => {
             }}
           />
         </article>
+        
 
         <article className="admin-dashboard__module admin-dashboard__module--videos">
           <header className="admin-dashboard__module-header">
@@ -615,6 +701,40 @@ const AdminDashboard = () => {
             status={opinionStatus}
             onEdit={openOpinionEditForm}
             onDelete={handleOpinionDelete}
+          />
+        </article>
+
+        <article className="admin-dashboard__module admin-dashboard__module--events">
+          <header className="admin-dashboard__module-header">
+            <div>
+              <h2>Próximos eventos</h2>
+              <p className="admin-dashboard__helper">Publica eventos con título, lugar, fecha/hora y enlace de inscripción.</p>
+            </div>
+            <div className="admin-dashboard__module-actions">
+              <button type="button" onClick={isEventFormOpen ? closeEventForm : openEventCreateForm}>
+                {isEventFormOpen ? 'Cerrar formulario' : 'Agregar evento'}
+              </button>
+            </div>
+          </header>
+
+          {isEventFormOpen ? (
+            <EventForm
+              key={eventInstanceKey}
+              mode={eventFormMode}
+              defaultValues={eventDefaults}
+              status={eventFormStatus}
+              errorMessage={eventFormError}
+              onSubmit={handleEventSubmit}
+              onCancel={closeEventForm}
+              onFeedback={(payload) => { setFeedback(payload); scheduleFeedbackClear(); }}
+            />
+          ) : null}
+
+          <EventList
+            items={eventItems}
+            status={eventStatus}
+            onEdit={openEventEditForm}
+            onDelete={handleEventDelete}
           />
         </article>
       </div>
