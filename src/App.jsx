@@ -860,8 +860,12 @@ const NewsDetailPage = ({ sectionPath = null }) => {
 
   // Hook: noticias para el aside (debe ejecutarse SIEMPRE para respetar reglas de Hooks)
   const { items: topNewsRaw } = useNews({ limit: 10 });
+  const [isPortrait, setIsPortrait] = useState(null);
+  const desiredCount = isPortrait === null ? 5 : isPortrait ? 7 : 3;
   const topNews = Array.isArray(topNewsRaw)
-    ? topNewsRaw.filter((n) => n?.slug && n.slug !== (article?.slug || slug)).slice(0, 7)
+    ? topNewsRaw
+        .filter((n) => n?.slug && n.slug !== (article?.slug || slug))
+        .slice(0, desiredCount)
     : [];
 
   if (status !== DETAIL_STATUS.ready || !article) {
@@ -919,7 +923,16 @@ const NewsDetailPage = ({ sectionPath = null }) => {
         <article className="news-feature news-feature--detail" aria-label={`Detalle de ${article.title}`}>
           <div className="news-feature__grid">
             <figure className="news-feature__photo">
-              <img src={article.imageUrl} alt={article.title} />
+              <img
+                src={article.imageUrl}
+                alt={article.title}
+                onLoad={(e) => {
+                  const img = e.currentTarget;
+                  if (img?.naturalWidth && img?.naturalHeight) {
+                    setIsPortrait(img.naturalHeight >= img.naturalWidth);
+                  }
+                }}
+              />
             </figure>
             <header className="news-feature__headline">
               <h2 className="sr-only">Metadatos de la noticia</h2>
