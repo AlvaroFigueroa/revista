@@ -13,6 +13,10 @@ import NewsForm from '../components/Admin/NewsForm';
 import NewsList from '../components/Admin/NewsList';
 import { useNews, NEWS_STATUS } from '../hooks/useNews';
 import { createNews, updateNews, deleteNews, generateNewsId } from '../services/news';
+import { useOpinions } from '../hooks/useOpinions';
+import OpinionForm from '../components/Admin/OpinionForm';
+import OpinionList from '../components/Admin/OpinionList';
+import { createOpinion, updateOpinion, deleteOpinion, generateOpinionId } from '../services/opinions';
 
 const DEFAULT_VIDEOS_TAG =
   HOME_SECTION_TITLES.find((title) => title === 'Videos recientes') ?? HOME_SECTION_TITLES[0];
@@ -50,11 +54,76 @@ const AdminDashboard = () => {
         setAdminStatus('error');
       }
     };
+
     load();
     return () => {
       cancelled = true;
     };
   }, [selectedTag]);
+
+  // Opiniones: handlers
+  const openOpinionCreateForm = () => {
+    setOpinionFormMode('create');
+    setOpinionDefaults({ id: generateOpinionId(), title: '', body: '', imageUrl: '', authorName: '', authorTitle: '' });
+    setIsOpinionFormOpen(true);
+    setOpinionFormStatus('idle');
+    setOpinionFormError(null);
+    setOpinionInstanceKey((v) => v + 1);
+  };
+
+  const openOpinionEditForm = (op) => {
+    setOpinionFormMode('edit');
+    setOpinionDefaults({ id: op.id, title: op.title || '', body: op.body || '', imageUrl: op.imageUrl || '', authorName: op.authorName || '', authorTitle: op.authorTitle || '' });
+    setIsOpinionFormOpen(true);
+    setOpinionFormStatus('idle');
+    setOpinionFormError(null);
+    setOpinionInstanceKey((v) => v + 1);
+  };
+
+  const closeOpinionForm = () => {
+    setIsOpinionFormOpen(false);
+    setOpinionFormMode('create');
+    setOpinionDefaults(null);
+    setOpinionFormStatus('idle');
+    setOpinionFormError(null);
+  };
+
+  const handleOpinionSubmit = async (payload) => {
+    setOpinionFormStatus('saving');
+    setOpinionFormError(null);
+    try {
+      if (opinionFormMode === 'edit' && opinionDefaults?.id) {
+        const { id, ...updates } = payload;
+        await updateOpinion(opinionDefaults.id, updates);
+        setOpinionFormStatus('success');
+        window.setTimeout(() => closeOpinionForm(), 800);
+      } else {
+        const { id, ...data } = payload;
+        await createOpinion({ id, ...data });
+        setOpinionFormStatus('success');
+        setOpinionDefaults({ id: generateOpinionId(), title: '', body: '', imageUrl: '', authorName: '', authorTitle: '' });
+        setOpinionInstanceKey((v) => v + 1);
+      }
+    } catch (e) {
+      console.error('No pudimos guardar la opinión', e);
+      setOpinionFormStatus('error');
+      setOpinionFormError(e?.message || 'No pudimos guardar la opinión.');
+    }
+  };
+
+  const handleOpinionDelete = async (op) => {
+    if (!op?.id) return;
+    const ok = window.confirm(`¿Eliminar la opinión "${op.title}"?`);
+    if (!ok) return;
+    try {
+      await deleteOpinion(op.id);
+      setFeedback({ type: 'success', text: 'Opinión eliminada.' });
+      scheduleFeedbackClear();
+    } catch (e) {
+      setFeedback({ type: 'error', text: e?.message || 'No pudimos eliminar la opinión.' });
+      scheduleFeedbackClear();
+    }
+  };
 
   const handleLoadMore = useCallback(async () => {
     if (!adminCursor) return;
@@ -97,6 +166,15 @@ const AdminDashboard = () => {
   const [newsFormStatus, setNewsFormStatus] = useState('idle');
   const [newsFormError, setNewsFormError] = useState(null);
   const [newsFormInstanceKey, setNewsFormInstanceKey] = useState(0);
+
+  // Opiniones
+  const { items: opinionItems, status: opinionStatus } = useOpinions({ limit: 50 });
+  const [isOpinionFormOpen, setIsOpinionFormOpen] = useState(false);
+  const [opinionFormMode, setOpinionFormMode] = useState('create');
+  const [opinionDefaults, setOpinionDefaults] = useState(null);
+  const [opinionFormStatus, setOpinionFormStatus] = useState('idle');
+  const [opinionFormError, setOpinionFormError] = useState(null);
+  const [opinionInstanceKey, setOpinionInstanceKey] = useState(0);
 
   const handleHeroSuccess = useCallback(() => {
     // El contenido del hero se actualiza automáticamente con el onSnapshot del hook.
@@ -504,6 +582,40 @@ const AdminDashboard = () => {
               {feedback.text}
             </p>
           ) : null}
+        </article>
+
+        <article className="admin-dashboard__module admin-dashboard__module--opinions">
+          <header className="admin-dashboard__module-header">
+            <div>
+              <h2>Columna de opinión</h2>
+              <p className="admin-dashboard__helper">Publica columnas con título, cuerpo, imagen (avatar), autor y cargo.</p>
+            </div>
+            <div className="admin-dashboard__module-actions">
+              <button type="button" onClick={isOpinionFormOpen ? closeOpinionForm : openOpinionCreateForm}>
+                {isOpinionFormOpen ? 'Cerrar formulario' : 'Agregar opinión'}
+              </button>
+            </div>
+          </header>
+
+          {isOpinionFormOpen ? (
+            <OpinionForm
+              key={opinionInstanceKey}
+              mode={opinionFormMode}
+              defaultValues={opinionDefaults}
+              status={opinionFormStatus}
+              errorMessage={opinionFormError}
+              onSubmit={handleOpinionSubmit}
+              onCancel={closeOpinionForm}
+              onFeedback={(payload) => { setFeedback(payload); scheduleFeedbackClear(); }}
+            />
+          ) : null}
+
+          <OpinionList
+            items={opinionItems}
+            status={opinionStatus}
+            onEdit={openOpinionEditForm}
+            onDelete={handleOpinionDelete}
+          />
         </article>
       </div>
     </section>

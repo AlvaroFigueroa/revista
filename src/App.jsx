@@ -13,6 +13,9 @@ import { useNews, NEWS_STATUS } from './hooks/useNews';
 import { NAVIGATION_TAGS } from './constants/navigationTags';
 import { getNewsBySlug } from './services/news';
 import VideoModal from './components/VideoModal';
+import { useOpinions } from './hooks/useOpinions';
+import OpinionCard from './components/Opinion/OpinionCard';
+import OpinionsPage from './pages/OpinionsPage';
 
 const TAG_TO_PATH = Object.entries(NAVIGATION_TAGS).reduce((accumulator, [path, label]) => {
   if (typeof label === 'string' && label.trim().length > 0) {
@@ -284,6 +287,7 @@ const Header = () => {
         ],
       },
       { label: "PyME's", path: '/pymes' },
+      { label: 'Columna de opinión', path: '/columna-de-opinion' },
       { label: 'Nosotros', path: '/nosotros' },
       { label: 'Contacto', path: '/contacto' },
     ],
@@ -1746,6 +1750,7 @@ const Newsletter = () => {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
+  const { items: opinions } = useOpinions({ limit: 1 });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -1832,8 +1837,12 @@ const Newsletter = () => {
             </p>
           ) : null}
         </div>
-        <aside className="newsletter__banner" aria-label="Espacio disponible para banner publicitario">
-          <span>Espacio para banner</span>
+        <aside className="newsletter__banner" aria-label="Columna de opinión">
+          {Array.isArray(opinions) && opinions[0] ? (
+            <OpinionCard opinion={opinions[0]} />
+          ) : (
+            <span>Columna de opinión</span>
+          )}
         </aside>
       </div>
     </section>
@@ -2280,6 +2289,7 @@ function App() {
         <Route path="acuicultura/:slug" element={<NewsDetailPage sectionPath="/acuicultura" />} />
         <Route path="lecheria" element={<LecheriaPage />} />
         <Route path="lecheria/:slug" element={<NewsDetailPage sectionPath="/lecheria" />} />
+        <Route path="columna-de-opinion" element={<OpinionsPage />} />
         <Route path="turismo" element={<TurismoPage />} />
         <Route path="turismo/operadores" element={<TurismoOperadoresPage />} />
         <Route path="turismo/operadores/:slug" element={<NewsDetailPage sectionPath="/turismo/operadores" />} />
