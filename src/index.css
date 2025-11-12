@@ -1685,6 +1685,21 @@ main {
   .news-feature iframe { aspect-ratio: 16/9; height: auto; display: block; }
 }
 
+/* Asegurar CTA visible y clickeable en móvil en todas las páginas */
+@media (max-width: 640px) {
+  .written-card { overflow: visible; }
+  .written-card__content { padding-bottom: 0.6rem; }
+  .written-card__cta {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 1;
+  }
+  .inner-page .written-card__cta { display: inline-flex !important; }
+}
+
 .videos {
   padding: 0 !important;
   background-color: transparent !important;
