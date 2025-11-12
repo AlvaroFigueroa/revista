@@ -15,6 +15,18 @@
   padding-top: 0 !important; 
 }
 
+/* Quitar cualquier línea separadora que cruce el ancho en Videos (internas) */
+.inner-page .videos { 
+  border-top: 0 !important; 
+  border-bottom: 0 !important; 
+}
+.inner-page .videos .section-heading, 
+.inner-page .videos .section-heading::before, 
+.inner-page .videos .section-heading::after { 
+  border: 0 !important; 
+  box-shadow: none !important; 
+}
+
 /* Reducir el margen inferior del listado de noticias para pegarlo a videos */
 .inner-page .written__grid { 
   margin-bottom: 0.5rem !important; 
