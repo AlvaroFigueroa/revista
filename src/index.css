@@ -1651,6 +1651,40 @@ main {
   }
 }
 
+/* Full-bleed del hero en móviles: ocupar 100vw y escalar el título */
+@media (max-width: 640px) {
+  .news-feature {
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0;
+    padding: 1rem 1rem 1.25rem;
+    box-shadow: none;
+  }
+  /* Contenedor del hero a ancho completo para que el titular respire */
+  .hero {
+    padding: 0;           /* sin padding lateral del wrapper */
+    width: 100vw;         /* ocupar todo el viewport */
+    margin-left: 50%;
+    transform: translateX(-50%);
+    overflow-x: hidden;   /* evitar scroll horizontal por el translate */
+    border-top: none;
+    border-bottom: none;
+  }
+  .news-feature__headline h2 {
+    font-size: clamp(1.6rem, 8vw, 2.2rem);
+    line-height: 1.15;
+  }
+  .news-feature__photo,
+  .news-feature__photo img,
+  .news-feature iframe,
+  .news-feature video {
+    width: 100%;
+    max-width: 100%;
+  }
+  .news-feature iframe { aspect-ratio: 16/9; height: auto; display: block; }
+}
+
 .videos {
   padding: 0 !important;
   background-color: transparent !important;

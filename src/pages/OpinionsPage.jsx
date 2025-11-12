@@ -38,7 +38,7 @@ const OpinionsPage = () => {
     <section className="inner-page" aria-labelledby="opinions-title">
       <div className="inner-page__hero">
         <h1 id="opinions-title">Columna de opinión</h1>
-        <p>Opiniones y columnas de especialistas invitad@s.</p>
+        <p>Opiniones y columnas de especialistas invitados.</p>
       </div>
       <div className="inner-page__content">
         <div className="opinions__pill-container" aria-hidden="true">

@@ -2033,7 +2033,6 @@ const Footer = () => {
           <p>
             Plataforma de noticias y análisis sobre acuicultura, lechería, agricultura y turismo en la zona sur de Chile.
           </p>
-          <p className="footer__brand-meta">Desde 2023 impulsando el periodismo especializado para la macrozona sur.</p>
         </div>
 
         <div className="footer__section">
@@ -2070,7 +2069,7 @@ const Footer = () => {
               <span className="footer__item-value">Javiera Rivas Acuña Ingeniera Comercial (UACh)</span>
             </li>
             <li className="footer__list-item">
-              <span className="footer__item-label">Diseño web e informática</span>
+              <span className="footer__item-label">Diseño web - informática</span>
               <span className="footer__item-value">Álvaro Figueroa Zapata</span>
             </li>
             <li className="footer__list-item">
