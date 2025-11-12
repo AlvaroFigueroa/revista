@@ -1194,6 +1194,23 @@ main {
   margin-bottom: 0; 
 }
 
+/* Header de 'Otras noticias' con controles a la derecha */
+.written__header.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.written__controls {
+  display: flex;
+  gap: 0.6rem;
+  margin-left: auto; /* empuja al extremo derecho */
+}
+@media (max-width: 640px) {
+  .written__header.section-heading { flex-direction: column; align-items: flex-start; }
+  .written__controls { width: 100%; justify-content: flex-end; }
+}
+
 /* Unificar color del badge en 'Videos recientes' con Newsletter */
 .videos .title-badge { 
   background: #1761a9 !important; 

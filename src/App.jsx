@@ -1638,12 +1638,15 @@ const PymesPage = () => (
 );
 
 const WrittenHighlights = () => {
-  const { items, status, error } = useNews({ tag: OTHER_NEWS_TAG, limit: OTHER_NEWS_LIMIT });
+  // Traemos un bloque amplio y paginamos en cliente en sets de 10
+  const { items, status, error } = useNews({ tag: OTHER_NEWS_TAG, limit: 100 });
+  const [page, setPage] = useState(0); // 0 = más recientes
+  const itemsPerPage = 10;
 
   const normalizedItems = useMemo(() => {
     if (!Array.isArray(items)) return [];
 
-    return items.slice(0, OTHER_NEWS_LIMIT).map((item, index) => {
+    return items.map((item, index) => {
       const title =
         typeof item.title === 'string' && item.title.trim().length > 0 ? item.title.trim() : 'Noticia sin título';
       const imageUrl =
@@ -1661,12 +1664,40 @@ const WrittenHighlights = () => {
     });
   }, [items]);
 
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(normalizedItems.length / itemsPerPage)), [normalizedItems.length]);
+  const start = page * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageItems = normalizedItems.slice(start, end);
+
+  const canPrev = page > 0;
+  const canNext = end < normalizedItems.length;
+
   return (
     <section className="written" aria-labelledby="written-highlights">
       <div className="written__header section-heading">
         <h2 id="written-highlights">
           <span className="title-badge">Otras noticias y comunicados de prensa</span>
         </h2>
+        <div className="written__controls" aria-label="Paginación de otras noticias">
+          <button
+            type="button"
+            className="opinions__loadmore"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={!canPrev}
+            aria-label="Ver más recientes"
+          >
+            Más recientes
+          </button>
+          <button
+            type="button"
+            className="opinions__loadmore"
+            onClick={() => setPage((p) => (canNext ? p + 1 : p))}
+            disabled={!canNext}
+            aria-label="Ver noticias más antiguas"
+          >
+            Ver más
+          </button>
+        </div>
       </div>
       <div className="written__grid">
         {status === NEWS_STATUS.loading ? (
@@ -1683,7 +1714,7 @@ const WrittenHighlights = () => {
             Aún no hay noticias registradas en esta sección.
           </p>
         ) : (
-          normalizedItems.map((article) => {
+          pageItems.map((article) => {
             const href = article.slug ? `/noticias/${article.slug}` : null;
             return (
               <article key={article.id} className="written-card">
@@ -1707,6 +1738,7 @@ const WrittenHighlights = () => {
           })
         )}
       </div>
+      {/* Controles movidos al encabezado */}
     </section>
   );
 };
