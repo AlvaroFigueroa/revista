@@ -252,6 +252,7 @@ const Header = () => {
   const navRef = useRef(null);
   const profileMenuRef = useRef(null);
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [isMobileNavOpen, setMobileNavOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -309,6 +310,7 @@ const Header = () => {
       if (event.key === 'Escape') {
         setActiveSubmenu(null);
         setProfileMenuOpen(false);
+        setMobileNavOpen(false);
       }
     };
 
@@ -361,6 +363,9 @@ const Header = () => {
     }
   };
 
+  const toggleMobileNav = () => setMobileNavOpen((current) => !current);
+  const closeMobileNav = () => setMobileNavOpen(false);
+
   const isAdminReady =
     adminStatus === ADMIN_ROLE_STATUS.ready || adminStatus === ADMIN_ROLE_STATUS.error;
 
@@ -389,6 +394,19 @@ const Header = () => {
           <img src="/imagenes/logo.png" alt="marka_e" className="header__logo-image" />
           <span className="sr-only">marka_e medio digital</span>
         </Link>
+
+        <button
+          type="button"
+          className={`header__hamburger${isMobileNavOpen ? ' is-open' : ''}`}
+          aria-label="Abrir menú"
+          aria-expanded={isMobileNavOpen}
+          aria-controls="mobile-nav"
+          onClick={toggleMobileNav}
+        >
+          <span className="header__hamburger-bar" />
+          <span className="header__hamburger-bar" />
+          <span className="header__hamburger-bar" />
+        </button>
 
         <div className="header__search">
           <span className="header__search-icon" aria-hidden>🔍</span>
@@ -553,6 +571,41 @@ const Header = () => {
           })}
         </ul>
       </nav>
+
+      {isMobileNavOpen && (
+        <div className="mobile-nav is-open" role="dialog" aria-modal="true" id="mobile-nav" onClick={(e) => { if (e.target === e.currentTarget) closeMobileNav(); }}>
+          <div className="mobile-nav__panel">
+            <header className="mobile-nav__header">
+              <span className="mobile-nav__title">Menú</span>
+              <button type="button" className="mobile-nav__close" aria-label="Cerrar" onClick={closeMobileNav}>×</button>
+            </header>
+            <ul className="mobile-nav__list">
+              {menuItems.map((item) => (
+                <li key={item.label} className="mobile-nav__item">
+                  {item.path ? (
+                    <button type="button" className={`mobile-nav__link${location.pathname === item.path ? ' is-active' : ''}`} onClick={() => { handleNavigate(item.path); closeMobileNav(); }}>
+                      {item.label}
+                    </button>
+                  ) : (
+                    <details className="mobile-nav__details">
+                      <summary>{item.label}</summary>
+                      <ul>
+                        {(item.submenu || []).map((sub) => (
+                          <li key={sub.path}>
+                            <button type="button" className={`mobile-nav__sublink${location.pathname === sub.path ? ' is-active' : ''}`} onClick={() => { handleNavigate(sub.path); closeMobileNav(); }}>
+                              {sub.label}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
