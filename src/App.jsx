@@ -1535,7 +1535,8 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
       
       {selectedVideo && (
         <VideoModal
-          video={selectedVideo}
+          videoUrl={selectedVideo.embedUrl}
+          title={selectedVideo.title}
           onClose={handleCloseModal}
         />
       )}
