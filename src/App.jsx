@@ -1803,6 +1803,9 @@ const Newsletter = () => {
           ) : null}
         </div>
         <aside className="newsletter__banner" aria-label="Columna de opinión">
+          <div className="opinions__pill-container opinions__pill-container--top" aria-hidden="true">
+            <div className="opinions__pill">COLUMNA DE OPINIÓN</div>
+          </div>
           {Array.isArray(opinions) && opinions[0] ? (
             <OpinionCard opinion={opinions[0]} />
           ) : (

@@ -1194,6 +1194,15 @@ main {
   margin-bottom: 0; 
 }
 
+/* Unificar color del badge en 'Videos recientes' con Newsletter */
+.videos .title-badge { 
+  background: #1761a9 !important; 
+  box-shadow: 0 12px 30px -20px rgba(23, 97, 169, 0.55) !important; 
+}
+.videos .title-badge::after { 
+  border-top: 6px solid #1761a9 !important; 
+}
+
 .hero__highlights {
   list-style: none;
   display: grid;
@@ -2652,14 +2661,18 @@ button.opinion-card { border: 0; padding: 0; background: none; }
 }
 
 .opinions__loadmore { 
-  padding: 0.8rem 1.4rem; 
+  padding: 0.45rem 1.4rem; 
   border-radius: 999px; 
   border: none; 
-  background: linear-gradient(135deg, #2563eb, #1d4ed8); 
+  background: #1761a9; /* mismo azul de Newsletter */ 
   color: #fff; 
   font-weight: 700; 
+  letter-spacing: 0.05em; 
   cursor: pointer; 
-  box-shadow: 0 18px 40px -30px rgba(37,99,235,0.5); 
+  box-shadow: 0 12px 30px -20px rgba(23, 97, 169, 0.55); 
+}
+.opinions__loadmore:hover { 
+  filter: brightness(1.02); 
 }
 
 .opinions__loadmore:disabled { 
@@ -2674,14 +2687,45 @@ button.opinion-card { border: 0; padding: 0; background: none; }
   margin: -1.25rem 0 0.75rem; 
   z-index: 2; 
 }
+.opinions__pill-container--left {
+  justify-content: flex-start;
+  margin-left: 0; /* se alinea al inicio del aside */
+}
+.newsletter__banner { position: relative; }
+.opinions__pill-container--top-left {
+  position: absolute;
+  top: -1.25rem;
+  left: 1rem; /* mismo padding horizontal que written__grid */
+  margin: 0; /* anular márgenes del contenedor centrado */
+  justify-content: flex-start;
+  width: auto;
+}
+
+.opinions__pill-container--top {
+  position: absolute;
+  top: -1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  justify-content: center;
+}
+
+/* Igualar ancho visual con el badge de Newsletter (ajustable) */
+.newsletter__banner .opinions__pill {
+  min-width: auto; /* mismo comportamiento que .title-badge */
+  text-align: center;
+  padding: 0.45rem 1.4rem; /* igual a .title-badge */
+  font-size: 0.85rem; /* igual a .title-badge */
+}
 .opinions__pill { 
-  background: #1d5faa; 
+  background: #1761a9; /* mismo color que .title-badge */
   color: #fff; 
-  padding: 0.6rem 1.4rem; 
+  padding: 0.45rem 1.4rem; /* mismo alto/espesor que Newsletter */
   border-radius: 999px; 
-  font-weight: 800; 
-  letter-spacing: 0.02em; 
-  box-shadow: 0 18px 34px -22px rgba(29,95,170,0.6); 
+  font-weight: 700; /* igual a .title-badge */
+  letter-spacing: 0.05em; /* igual a .title-badge */
+  font-size: 0.85rem; /* igual a .title-badge */
+  box-shadow: 0 12px 30px -20px rgba(23, 97, 169, 0.55); /* igual a .title-badge */
   position: relative; 
 }
 .opinions__pill::after { 
@@ -2694,7 +2738,7 @@ button.opinion-card { border: 0; padding: 0; background: none; }
   height: 0; 
   border-left: 6px solid transparent; 
   border-right: 6px solid transparent; 
-  border-top: 6px solid #1d5faa; 
+  border-top: 6px solid #1761a9; /* igual a .title-badge */
 }
 .newsletter__message {
   margin-top: 1rem;
