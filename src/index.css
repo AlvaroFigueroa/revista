@@ -1,3 +1,30 @@
+/* Alinear videos dentro de páginas internas: sin banda a todo el ancho */
+.inner-page .videos:not(.videos--home) {
+  background-color: transparent !important;
+  padding: 0.5rem 0 1.5rem !important; /* menos espacio vertical */
+}
+
+/* Reducir espacio vertical entre listado de noticias y sección de videos */
+.inner-page__content + .videos { 
+  margin-top: 0.25rem !important; 
+}
+.inner-page .videos .section-heading { 
+  margin: 0 0 0.75rem !important; 
+}
+.inner-page .videos__container { 
+  padding-top: 0 !important; 
+}
+
+/* Reducir el margen inferior del listado de noticias para pegarlo a videos */
+.inner-page .written__grid { 
+  margin-bottom: 0.5rem !important; 
+}
+
+/* Afinar el gap de la grilla de videos en internas para que suba visualmente */
+.inner-page .videos__grid { 
+  gap: 1.25rem !important; 
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -1587,10 +1614,10 @@ main {
 }
 
 .videos {
-  padding: 2rem 0 3rem !important;
-  background-color: #f8fafc !important;
-  width: 100% !important;
-  max-width: 100% !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  width: auto !important;
+  max-width: none !important;
   margin: 0 !important;
   box-sizing: border-box !important;
 }
@@ -1612,38 +1639,75 @@ main {
   display: grid !important;
   gap: 1.5rem !important;
   grid-template-columns: repeat(4, minmax(240px, 1fr)) !important;
-  max-width: 1400px !important;
-  margin: 0 auto !important;
-  padding: 0 2rem !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
+  place-items: stretch;
 }
 
 /* Overrides sólo para páginas internas (no home) */
+.videos:not(.videos--home) .videos__container {
+  max-width: 1600px !important; /* igual a .written__grid */
+  margin: 0 auto !important;
+  padding: 0 1rem !important; /* mismo padding que .written__grid (0 1rem) */
+  box-sizing: border-box;
+}
 .inner-page .videos__grid {
-  max-width: 1200px !important; /* Igualar ancho visual de contenido interno */
-  padding: 0 1.5rem !important; /* Margen consistente con el resto de la página */
-  grid-template-columns: repeat(4, minmax(260px, 1fr)) !important; /* Cards un poco más anchas para títulos */
+  max-width: 1600px !important; /* Igualar a written__grid */
+  padding: 0 !important; /* El padding lo maneja el contenedor */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; /* mismo mínimo que noticias */
+  justify-content: start !important;
 }
 
 @media (max-width: 1280px) {
+  .videos:not(.videos--home) .videos__container {
+    max-width: 1300px !important; /* coherente con written__grid @max-width:1200/1300 breakpoints */
+    padding: 0 1rem !important; /* mantener coherencia */
+  }
   .inner-page .videos__grid {
-    max-width: 1100px !important;
+    max-width: 1300px !important;
     grid-template-columns: repeat(3, minmax(260px, 1fr)) !important;
+    justify-content: start !important;
   }
 }
 
 @media (max-width: 1024px) {
+  .videos:not(.videos--home) .videos__container {
+    max-width: 1100px !important; /* escrito similar al breakpoint de written__grid */
+    padding: 0 1rem !important; /* igual a written__grid */
+  }
   .inner-page .videos__grid {
-    max-width: 900px !important;
+    max-width: 1100px !important;
     grid-template-columns: repeat(2, minmax(260px, 1fr)) !important;
+    justify-content: start !important;
   }
 }
 
 @media (max-width: 640px) {
+  .videos:not(.videos--home) .videos__container {
+    max-width: 100% !important;
+    padding: 0 1rem !important; /* written__grid mantiene 1rem en mobile */
+  }
   .inner-page .videos__grid {
     max-width: 100% !important;
-    padding: 0 1rem !important;
+    padding: 0 !important;
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Grid específico para páginas no-home si no están bajo .inner-page */
+.videos:not(.videos--home) .videos__grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+}
+@media (max-width: 1280px) {
+  .videos:not(.videos--home) .videos__grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  }
+}
+@media (max-width: 1024px) {
+  .videos:not(.videos--home) .videos__grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  }
+}
+@media (max-width: 640px) {
+  .videos:not(.videos--home) .videos__grid {
     grid-template-columns: 1fr !important;
   }
 }
@@ -1651,8 +1715,8 @@ main {
 /* Estilos para las tarjetas de video */
 .video-card {
   width: 100%;
-  max-width: 100%;
-  margin: 0;
+  max-width: 220px; /* igual a written-card */
+  margin: 0 auto; /* centrar como noticias */
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1669,11 +1733,11 @@ main {
   box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
-/* Asegurar que la miniatura del video mantenga la proporción 16:9 */
+/* Asegurar que la miniatura del video mantenga la proporción 4:3 como noticias */
 .video-card__thumbnail {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* Proporción 16:9 */
+  padding-top: 75%; /* Proporción 4:3 */
   overflow: hidden;
 }
 
@@ -1798,7 +1862,7 @@ main {
 .video-card__thumbnail {
   position: relative;
   width: 100%;
-  aspect-ratio: 16/9;
+  aspect-ratio: 4 / 3; /* igual que written-card__image */
   background: #f8fafc;
   display: flex;
   align-items: center;

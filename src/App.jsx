@@ -1347,81 +1347,6 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
-  
-  // Asegurar que el contenedor principal ocupe todo el ancho
-  useEffect(() => {
-    const mainContent = document.querySelector('.inner-page');
-    const innerContent = document.querySelector('.inner-page__content');
-    
-    if (mainContent) {
-      mainContent.style.maxWidth = '100%';
-      mainContent.style.padding = '0';
-      mainContent.style.margin = '0';
-    }
-    
-    if (innerContent) {
-      innerContent.style.maxWidth = '100%';
-      innerContent.style.padding = '0';
-      innerContent.style.margin = '0';
-    }
-    
-    // Aplicar estilos específicos para la sección de videos
-    const videosSection = document.querySelector('.videos');
-    if (videosSection) {
-      videosSection.style.width = '100%';
-      videosSection.style.maxWidth = '100%';
-      videosSection.style.margin = '0 auto';
-      videosSection.style.padding = '2rem 0 3rem';
-      videosSection.style.backgroundColor = '#f8fafc';
-      videosSection.style.boxSizing = 'border-box';
-    }
-    
-    // Asegurar que el grid de videos ocupe todo el ancho
-    const videosGrid = document.querySelector('.videos__grid');
-    if (videosGrid) {
-      videosGrid.style.maxWidth = '1400px';
-      videosGrid.style.margin = '0 auto';
-      videosGrid.style.padding = '0 2rem';
-      videosGrid.style.display = 'grid';
-      videosGrid.style.gridTemplateColumns = 'repeat(4, minmax(240px, 1fr))';
-      videosGrid.style.gap = '1.5rem';
-      videosGrid.style.width = '100%';
-      videosGrid.style.boxSizing = 'border-box';
-    }
-    
-    // Asegurar que los títulos de las tarjetas de video tengan el mismo estilo
-    const videoTitles = document.querySelectorAll('.video-card__title');
-    videoTitles.forEach(title => {
-      title.style.fontSize = '0.95rem';
-      title.style.fontWeight = '600';
-      title.style.color = '#1e293b';
-      title.style.margin = '0';
-      title.style.display = '-webkit-box';
-      title.style.WebkitLineClamp = '2';
-      title.style.WebkitBoxOrient = 'vertical';
-      title.style.overflow = 'hidden';
-      title.style.textOverflow = 'ellipsis';
-      title.style.minHeight = '2.8em';
-      title.style.lineHeight = '1.4';
-      title.style.letterSpacing = '-0.01em';
-      title.style.wordBreak = 'break-word';
-    });
-    
-    // Restaurar estilos al desmontar
-    return () => {
-      if (mainContent) {
-        mainContent.style.maxWidth = '';
-        mainContent.style.padding = '';
-        mainContent.style.margin = '';
-      }
-      
-      if (innerContent) {
-        innerContent.style.maxWidth = '';
-        innerContent.style.padding = '';
-        innerContent.style.margin = '';
-      }
-    };
-  }, [tag]); // Se ejecuta cuando cambia el tag de la sección
 
   const normalizedItems = useMemo(() => {
     if (!Array.isArray(items)) return [];
@@ -1501,30 +1426,15 @@ const SectionNewsPage = ({ tag, heroVariant = '', title, intro, headingId }) => 
   const heroClassName = heroVariant.length > 0 ? `inner-page__hero ${heroVariant}` : 'inner-page__hero';
 
   return (
-    <section className="inner-page" aria-labelledby={headingId} style={{
-      maxWidth: '100%',
-      padding: '0',
-      margin: '0',
-      width: '100%'
-    }}>
+    <section className="inner-page" aria-labelledby={headingId}>
       <div className={heroClassName}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '0 2rem',
-          width: '100%'
-        }}>
+        <div>
           <h1 id={headingId}>{title}</h1>
           <p>{intro}</p>
         </div>
       </div>
 
-      <div className="inner-page__content" style={{
-        maxWidth: '100%',
-        padding: '0',
-        margin: '0',
-        width: '100%'
-      }}>
+      <div className="inner-page__content">
         {status === NEWS_STATUS.loading ? (
           <p role="status">Cargando noticias…</p>
         ) : status === NEWS_STATUS.error ? (
