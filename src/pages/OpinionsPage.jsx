@@ -41,6 +41,9 @@ const OpinionsPage = () => {
         <p>Opiniones y columnas de especialistas invitad@s.</p>
       </div>
       <div className="inner-page__content">
+        <div className="opinions__pill-container" aria-hidden="true">
+          <div className="opinions__pill">COLUMNA DE OPINIÓN</div>
+        </div>
         <div className="opinions__filters" role="region" aria-label="Filtros de opiniones">
           <label className="opinions__filter-group">
             <span>Autor</span>

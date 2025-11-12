@@ -761,6 +761,34 @@ body {
   to { transform: translateX(0); }
 }
 
+/* Fix visibilidad CTA "Leer más" en móviles (Otras noticias) */
+@media (max-width: 480px) {
+  .written-card { 
+    overflow: visible; 
+  }
+  .written-card__content { 
+    display: flex; 
+    flex-direction: column; 
+    min-height: 120px; 
+    overflow: visible; 
+  }
+  .written-card__content h3 { 
+    line-clamp: 2; 
+    -webkit-line-clamp: 2; 
+  }
+  .written-card__content p { 
+    line-clamp: 1; 
+    -webkit-line-clamp: 1; 
+  }
+  .written-card__cta { 
+    display: inline-flex; 
+    margin-top: auto; 
+    visibility: visible; 
+    position: relative; 
+    z-index: 1; 
+  }
+}
+
 .header__nav-item--has-submenu {
   position: relative;
   padding-bottom: 0.5rem;
@@ -2563,6 +2591,35 @@ button.opinion-card { border: 0; padding: 0; background: none; }
   cursor: progress; 
 }
 
+.opinions__pill-container { 
+  display: flex; 
+  justify-content: center; 
+  position: relative; 
+  margin: -1.25rem 0 0.75rem; 
+  z-index: 2; 
+}
+.opinions__pill { 
+  background: #1d5faa; 
+  color: #fff; 
+  padding: 0.6rem 1.4rem; 
+  border-radius: 999px; 
+  font-weight: 800; 
+  letter-spacing: 0.02em; 
+  box-shadow: 0 18px 34px -22px rgba(29,95,170,0.6); 
+  position: relative; 
+}
+.opinions__pill::after { 
+  content: ""; 
+  position: absolute; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  bottom: -6px; 
+  width: 0; 
+  height: 0; 
+  border-left: 6px solid transparent; 
+  border-right: 6px solid transparent; 
+  border-top: 6px solid #1d5faa; 
+}
 .newsletter__message {
   margin-top: 1rem;
   font-size: 0.95rem;
