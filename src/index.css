@@ -1700,6 +1700,26 @@ main {
   .inner-page .written-card__cta { display: inline-flex !important; }
 }
 
+/* Hero: Otras noticias -> asegurar CTA visible en móvil */
+@media (max-width: 640px) {
+  .hero__highlight-content { overflow: visible; }
+  .hero__highlight-cta,
+  .hero__highlight-cta--inline {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 1;
+  }
+  /* Refuerzo genérico para enlaces accesibles de Leer más */
+  a[aria-label^="Leer más"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}
+
 .videos {
   padding: 0 !important;
   background-color: transparent !important;
@@ -2377,6 +2397,8 @@ main {
     max-width: 100%;
     padding: 0.6rem;
     border-radius: 8px;
+    aspect-ratio: auto; /* permitir que crezca para no cortar CTA */
+    min-height: 300px;  /* asegurar espacio para título + resumen + CTA */
   }
   
   .written-card__image {
