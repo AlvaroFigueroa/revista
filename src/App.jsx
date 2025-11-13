@@ -2319,8 +2319,8 @@ function App() {
         <Route path="economia-desarrollo/:slug" element={<NewsDetailPage sectionPath="/economia-desarrollo" />} />
         <Route path="contacto" element={<ContactoPage />} />
         <Route path="auth" element={<AuthPage />} />
+        <Route path="noticias/:slug" element={<NewsDetailPage />} />
       </Route>
-      <Route path="noticias/:slug" element={<NewsDetailPage />} />
       <Route path="admin/login" element={<AdminLoginPage />} />
       <Route path="admin" element={<ProtectedRoute />}>
         <Route index element={<AdminDashboard />} />
