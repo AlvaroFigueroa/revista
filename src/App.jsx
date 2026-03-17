@@ -746,6 +746,17 @@ const Hero = () => {
           <div className="hero__panel-header" aria-hidden="true">
             <span className="title-badge title-badge--compact">Otras noticias</span>
           </div>
+          <Link
+            to="/transforma2026"
+            className="hero__highlights-banner"
+            aria-label="Ir a Transforma 2026"
+          >
+            <img
+              src="/imagenes/noticias%20prensa/COBERTURA%20ESPECIAL.jpeg"
+              alt="Cobertura especial"
+              loading="lazy"
+            />
+          </Link>
           <ul
             className="hero__highlights"
             aria-label="Otras noticias relevantes"
