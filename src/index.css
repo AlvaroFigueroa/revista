@@ -1015,6 +1015,10 @@ main {
   gap: 0.85rem;
 }
 
+.hero__panel--highlights .hero__highlights {
+  margin-top: auto;
+}
+
 .hero__panel-header {
   display: flex;
   align-items: center;
