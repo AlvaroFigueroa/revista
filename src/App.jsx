@@ -2282,51 +2282,12 @@ const ContactoPage = () => (
 );
 
 const Transforma2026Page = () => (
-  <section className="inner-page" aria-labelledby="transforma2026-title">
-    <div className="inner-page__hero inner-page__hero--corporativo">
-      <h1 id="transforma2026-title">Transforma 2026</h1>
-      <p>
-        Iniciativa estratégica para impulsar la transformación digital y el desarrollo sostenible de las empresas de la región.
-      </p>
-    </div>
-    <div className="inner-page__content">
-      <article>
-        <h2>¿Qué es Transforma 2026?</h2>
-        <p>
-          Transforma 2026 es un programa integral diseñado para acompañar a las empresas en su proceso de digitalización 
-          y adaptación a las nuevas demandas del mercado. A través de capacitación, asesoría técnica y acceso a tecnologías 
-          innovadoras, buscamos fortalecer la competitividad del tejido empresarial regional.
-        </p>
-      </article>
-      <article>
-        <h2>Objetivos del Programa</h2>
-        <p>
-          El programa tiene como meta principal preparar a las empresas para los desafíos del 2026, enfocándose en 
-          cuatro pilares fundamentales: digitalización de procesos, sostenibilidad ambiental, innovación en modelos 
-          de negocio y desarrollo de capacidades humanas. A través de workshops, mentorías y proyectos piloto, 
-          las empresas participantes podrán transformar sus operaciones y posicionarse mejor en el mercado.
-        </p>
-      </article>
-      <article>
-        <h2>¿Quiénes pueden participar?</h2>
-        <p>
-          Transforma 2026 está dirigido a empresas de todos los tamaños y sectores productivos de la región. 
-          Especialmente a aquellas PyMEs que buscan modernizar sus operaciones, adoptar tecnologías digitales 
-          y mejorar su sostenibilidad ambiental. Las empresas seleccionadas recibirán acompañamiento personalizado 
-          y acceso a redes de expertos y proveedores tecnológicos.
-        </p>
-      </article>
-      <article>
-        <h2>Beneficios y Resultados Esperados</h2>
-        <p>
-          Los participantes del programa Transforma 2026 podrán acceder a beneficios concretos como: diagnóstico 
-          digital gratuito, planes de transformación personalizados, capacitación en herramientas digitales, 
-          acceso a financiamiento para proyectos de innovación, y visibilidad en plataformas de mercado. 
-          El objetivo es que al término del programa, las empresas hayan implementado mejoras significativas 
-          en su productividad, sostenibilidad y competitividad.
-        </p>
-      </article>
-    </div>
+  <section className="transforma2026-fullscreen" aria-label="Transforma 2026">
+    <img
+      src="/imagenes/noticias%20prensa/Grafica%20pronto%20cobertura.jpeg"
+      alt="Transforma 2026"
+      loading="lazy"
+    />
   </section>
 );
 
