@@ -50,6 +50,7 @@ export function useVideos({ tag, limit = DEFAULT_LIMIT } = {}) {
   };
 
   const effectiveLimit = useMemo(() => normalizeLimit(limit), [limit]);
+  const fetchLimit = useMemo(() => (effectiveLimit === null ? null : effectiveLimit * 2), [effectiveLimit]);
   const normalizedTag = useMemo(() => (typeof tag === 'string' ? tag.trim() : ''), [tag]);
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export function useVideos({ tag, limit = DEFAULT_LIMIT } = {}) {
 
     const unsubscribe = subscribeToVideos({
       tag: normalizedTag,
-      limit: effectiveLimit,
+      limit: fetchLimit,
       onNext: (docs) => {
         // Normalizar URL y deduplicar por ID de YouTube (preferido) o embedUrl canónico
         const normalized = docs.map((v) => {
@@ -77,8 +78,10 @@ export function useVideos({ tag, limit = DEFAULT_LIMIT } = {}) {
           uniqueVideos.push(v);
         }
 
-        setItems(uniqueVideos);
-        setStatus(uniqueVideos.length === 0 ? VIDEOS_STATUS.empty : VIDEOS_STATUS.ready);
+        const limitedVideos = effectiveLimit === null ? uniqueVideos : uniqueVideos.slice(0, effectiveLimit);
+
+        setItems(limitedVideos);
+        setStatus(limitedVideos.length === 0 ? VIDEOS_STATUS.empty : VIDEOS_STATUS.ready);
       },
       onError: (subscriptionError) => {
         setError(parseError(subscriptionError));
